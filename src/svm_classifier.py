@@ -1,17 +1,17 @@
 import classifier
 from sklearn.svm import LinearSVC, SVC
+from sklearn.linear_model import SGDClassifier
 import numpy as np
 
 
 class SVMClassifier(classifier.Classifier):
 
-    def __init__(self):
+    def __init__(self, m):
 
-        self.model = LinearSVC(verbose=2,
-                  max_iter=50000, fit_intercept=True, class_weight="balanced", penalty="l2", dual=False)
+        #self.model = LinearSVC(max_iter=50000, fit_intercept=True, class_weight="balanced", penalty="l2", dual=False)
+        self.model = m #SGDClassifier(loss = "perceptron", penalty = "l2")
 
-
-    def train(self, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray, Y_dev: np.ndarray) -> float:
+    def train_network(self, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray, Y_dev: np.ndarray) -> float:
 
         """
         :param X_train:
@@ -30,4 +30,8 @@ class SVMClassifier(classifier.Classifier):
         :return: final weights of the model, as np array
         """
 
-        return self.model.coef_
+        w = self.model.coef_
+        if len(w.shape) == 1:
+                w  = np.expand_dims(w, 0)
+        
+        return w
