@@ -6,10 +6,11 @@ import classifier
 import svm_classifier
 from sklearn.svm import LinearSVC, SVC, SVR
 from sklearn.neural_network import MLPClassifier
-from sklearn.linear_model import SGDClassifier, SGDRegressor
+from sklearn.linear_model import SGDClassifier, SGDRegressor, Perceptron
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from siamese import Siamese
 REGRESSION = False
+from typing import List
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     """
@@ -24,8 +25,19 @@ def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     return projection_matrix
 
 
+
+def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
+
+        P = np.eye(input_dim)
+        for v in directions:
+        
+                P_v = get_nullspace_projection(v)
+                P = P.dot(P_v)
+        
+        return P
+
 def get_debiasing_projection(classifier_class: classifier.Classifier, num_classifiers: int, input_dim: int, is_autoregressive: bool,
-           min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray, Y_dev: np.ndarray, noise = False, random_subset = True, regression = False, siamese = False) -> np.ndarray:
+           min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray, Y_dev: np.ndarray, noise = False, random_subset = True, regression = False, siamese = False, siamese_dim = 1) -> np.ndarray:
 
     """
 
@@ -72,11 +84,12 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
                 x_t,y_t = X_train_cp, Y_train
                 
         #clf = classifier_class()
-        if np.random.random() < 0.3:
-                clf = svm_classifier.SVMClassifier(SGDClassifier(max_iter=7500, fit_intercept = True, penalty = "l2"))
+        if np.random.random() < 0.0:
+                clf = svm_classifier.SVMClassifier(SGDClassifier(max_iter=2000, fit_intercept = True, penalty = "l2", n_jobs = 4))
                 #clf = svm_classifier.SVMClassifier(LinearDiscriminantAnalysis(n_components = 1))
+                #clf = svm_classifier.SVMClassifier(Perceptron(max_iter = 300))
         else:
-                clf = svm_classifier.SVMClassifier(LinearSVC(max_iter=35000, fit_intercept=True, class_weight="balanced", penalty="l2", dual=False))
+                clf = svm_classifier.SVMClassifier(LinearSVC(max_iter=35000, fit_intercept=True, class_weight="balanced", dual=False))
         
         if regression:
                 if np.random.random() < 0.5:
@@ -84,11 +97,11 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
                 else:
                         clf = svm_classifier.SVMClassifier(SVR(max_iter=35000, kernel = "linear"))
         
-        if siamese and i > num_classifiers/2:
+        if siamese and np.random.random() < 0.25: #i < int(num_classifiers/4):
                 if regression:
                         raise Exception("subset not implemened for regression") 
         
-                clf = Siamese(x_t, y_t, X_dev_cp, Y_dev)
+                clf = Siamese(x_t, y_t, X_dev_cp, Y_dev, siamese_dim)
                 
 
         acc = clf.train_network(x_t, y_t, X_dev_cp, Y_dev)
@@ -109,9 +122,9 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
     
     
 if __name__ == '__main__':
-    X = np.random.rand(1000,300)
-    Y = np.random.rand(1000) < 0.5
-    num_classifiers = 3
+    X = np.random.rand(5000,300)
+    Y = np.random.rand(5000) < 0.5
+    num_classifiers = 15
     classifier_class = None
     input_dim = 300
     is_autoregressive = True
@@ -125,7 +138,7 @@ if __name__ == '__main__':
     print(list(zip(X.dot(P)[0], X.dot(P).dot(P)[0]))[:10])
     
     print(list(zip(P[0], P.dot(P)[0]))[:10])   
-    assert np.allclose(P.dot(P), P)
-    assert np.allclose(P.dot(P), P.T)
+    #assert np.allclose(P.dot(P), P)
+    #assert np.allclose(P.dot(P), P.T)
     print("yay")
     
