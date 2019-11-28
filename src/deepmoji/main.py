@@ -37,6 +37,7 @@ def find_projection_matrices(X_train,Y_train, X_dev, Y_dev, dim = 2304, attribut
     regression = False
 
     for n in num_clfs:
+        print("num classifiers: {}".format(n))
 
         P_n = debias.get_debiasing_projection(None, n, dim, is_autoregressive, min_acc, X_train, Y_train, X_dev, Y_dev,
                                               noise = noise, random_subset = random_subset,
@@ -48,4 +49,6 @@ def find_projection_matrices(X_train,Y_train, X_dev, Y_dev, dim = 2304, attribut
 if __name__ == '__main__':
 
     data_type = sys.argv[1] # race/gender
-    path = "/home/nlp/lazary/workspace/thesis/shrink-task-learning/data/processed/emoji_{}".format(data)
+    path = "/home/nlp/lazary/workspace/thesis/shrink-task-learning/data/processed/emoji_{}".format(data_type)
+    X_train, X_dev, y_train, y_dev = load_data(path)
+    find_projection_matrices(X_train, y_train, X_dev, y_dev, attribute = data_type)
