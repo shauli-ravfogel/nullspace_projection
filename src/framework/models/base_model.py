@@ -80,7 +80,7 @@ class BaseModel(Model):
         """
         embeddings = self.text_field_embedder(text)
 
-        cls = embeddings[:, :, :]
+        cls = embeddings[:, 0, :]
 
         scores = self.scorer(cls)
         y_hat = torch.argmax(scores, dim=1)

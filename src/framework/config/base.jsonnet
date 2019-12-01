@@ -1,7 +1,7 @@
 // Configuration for a the baseline model with w2v embeddings used in tacl paper
 
 
-local data_path = "../data/unsupervised_data/small_hard/";
+local data_path = "../data/sent_race.jsonl";
 local emb_dim = 300;
 local emb_out = 200;
 {
@@ -11,10 +11,10 @@ local emb_out = 200;
             "tokens": { "type": "single_id" }
         }
   },
-  "train_data_path": data_path + "train.jsonl",
-  "validation_data_path": data_path + "dev.jsonl",
-  "test_data_path": "allennlp_models/data_converters/real_train_to_dobj.jsonl",
-  "evaluate_on_test": true,
+  "train_data_path": data_path,// + "train.jsonl",
+  "validation_data_path": data_path,// + "dev.jsonl",
+  //"test_data_path": "allennlp_models/data_converters/real_train_to_dobj.jsonl",
+  "evaluate_on_test": false,
 
   "model": {
     "type": "model_base",
@@ -29,7 +29,7 @@ local emb_out = 200;
         }
       }
     },
-    "emb_size": 768
+    "emb_size": 300,
     "mlp_dropout": 0.2
   },
   "iterator": {
