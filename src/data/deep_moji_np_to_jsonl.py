@@ -1,11 +1,11 @@
 """
 Usage:
-  collect_aspectual.py [--input_dir=INPUT_DIR] [--output_file=OUTPUT_FILE]
+  collect_aspectual.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR]
 
 Options:
   -h --help                     show this help message and exit
   --input_dir=INPUT_DIR         input dir file
-  --output_file=OUTPUT_FILE     write down output file
+  --output_dir=OUTPUT_DIR       write down output file
 
 Script for collecting potential verbs from the aspecutal verbs list.
 """
@@ -17,14 +17,18 @@ import numpy as np
 from docopt import docopt
 
 
-def read_data_file(input_file: str, main_label, demog_label) -> List[Dict]:
+def read_data_file(input_file: str):
     vecs = np.load(input_file)
 
-    data = []
-    for vec in vecs:
-        data.append({'vec': vec, 'main_label': main_label, 'demographic_label': demog_label})
+    np.random.shuffle(vecs)
 
-    return data
+    return vecs[:30000], vecs[30000:32000], vecs[32000:35500]
+
+    # data = []
+    # for vec in vecs:
+    #     data.append({'vec': vec, 'main_label': main_label, 'demographic_label': demog_label})
+    #
+    # return data
 
 
 if __name__ == '__main__':
@@ -32,16 +36,22 @@ if __name__ == '__main__':
 
     in_dir = arguments['--input_fir']
 
-    pos_pos = read_data_file(in_dir + '/pos_pos', 'positive', 'aa')
-    pos_neg = read_data_file(in_dir + '/pos_neg', 'positive', 'white')
-    neg_pos = read_data_file(in_dir + '/neg_pos', 'negative', 'aa')
-    neg_neg = read_data_file(in_dir + '/neg_neg', 'negative', 'white')
+    out_dir = arguments['--output_dir']
 
-    all_data = pos_pos + pos_neg + neg_pos + neg_neg
-    np.random.shuffle(all_data)
+    for split in ['pos_pos', 'pos_neg', 'neg_pos', 'neg_neg']:
+        data = read_data_file(in_dir + '/' + split + '.npy')
+        np.save(out_dir + '/' + split + '.npy')
 
-    out_file = arguments['--output_file']
-
-    with open(out_file, 'w') as f:
-        for line in all_data:
-            f.write(json.dumps(line) + '\n')
+    # pos_pos = read_data_file(in_dir + '/pos_pos')
+    # pos_neg = read_data_file(in_dir + '/pos_neg')
+    # neg_pos = read_data_file(in_dir + '/neg_pos')
+    # neg_neg = read_data_file(in_dir + '/neg_neg')
+    #
+    # all_data = pos_pos + pos_neg + neg_pos + neg_neg
+    # np.random.shuffle(all_data)
+    #
+    # out_file = arguments['--output_file']
+    #
+    # with open(out_file, 'w') as f:
+    #     for line in all_data:
+    #         f.write(json.dumps(line) + '\n')
