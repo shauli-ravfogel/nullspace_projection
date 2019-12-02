@@ -1,0 +1,12 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "My tensor",
+      "tensorShape": [
+        1000,
+        50
+      ],
+      "tensorPath": "https://raw.githubusercontent.com/Shaul1321/nullspace_projection/notebooks/vecs.tsv,
+      "metadataPath": "https://raw.githubusercontent.com/Shaul1321/nullspace_projection/notebooks/labels.tsv"
+    }
+  ]
