@@ -25,7 +25,7 @@ def read_data_file(input_file: str):
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    in_dir = arguments['--input_fir']
+    in_dir = arguments['--input_dir']
 
     out_dir = arguments['--output_dir']
 
