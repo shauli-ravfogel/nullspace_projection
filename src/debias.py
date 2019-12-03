@@ -1,14 +1,8 @@
+from typing import Dict
+
 import numpy as np
 import scipy
-from scipy import linalg
-from typing import Tuple, Dict
-import classifier
-import svm_classifier
-from sklearn.svm import LinearSVC, SVC, SVR
-from sklearn.neural_network import MLPClassifier
-from sklearn.linear_model import SGDClassifier, SGDRegressor, Perceptron
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.base import BaseEstimator
+from src import svm_classifier
 
 REGRESSION = False
 from typing import List
@@ -77,6 +71,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
         # clf = svm_classifier.SVMClassifier(
         #     LinearSVC(max_iter=35000, fit_intercept=True, class_weight="balanced", dual=False))
+        # x_t,y_t = X_train_cp, Y_train
 
         acc = clf.train_network(x_t, y_t, X_dev_cp, Y_dev)
         print("Iteration {}, Accuracy: {}".format(i, acc))
@@ -105,8 +100,8 @@ if __name__ == '__main__':
     random_subset = True
     siamese = True
 
-    P = get_debiasing_projection(classifier_class, num_classifiers, input_dim, is_autoregressive, min_accuracy, X, Y, X,
-                                 Y, noise=noise, random_subset=random_subset, siamese=siamese)
+    P = get_debiasing_projection(classifier_class, None, num_classifiers, input_dim, is_autoregressive, min_accuracy,
+                                 X, Y, X, Y, noise=noise)
 
     print(list(zip(X.dot(P)[0], X.dot(P).dot(P)[0]))[:10])
 

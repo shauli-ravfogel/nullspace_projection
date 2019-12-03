@@ -1,6 +1,6 @@
 """
 Usage:
-  collect_aspectual.py [--input_dir=INPUT_DIR] [--output_file=OUTPUT_FILE]
+  convert_data.py [--input_dir=INPUT_DIR] [--output_file=OUTPUT_FILE]
 
 Options:
   -h --help                     show this help message and exit
@@ -17,15 +17,28 @@ import numpy as np
 from docopt import docopt
 
 
-def read_data_file(input_file: str, vocab: dict, main_label, demog_label) -> List[Dict]:
+def read_data_file(input_file, vocab, main_label, demog_label):
     with open(input_file, 'r') as f:
         lines = f.readlines()
         lines = [x.strip().split() for x in lines]
 
     data = []
     for line in lines:
-        text = [vocab[x] for x in line]
+        text = [vocab[int(x)] for x in line]
+        uni_text = []
+        err = False
+        for w in text:
+            try:
+                w = unicode(w)
+            except:
+                w = 'unicode-err'
+                err = True
+            uni_text.append(w)
+        text = ' '.join(uni_text)
+        if err:
+            continue
         data.append({'text': text, 'main_label': main_label, 'demographic_label': demog_label})
+        #data.append({'text': text.decode('utf-8'), 'main_label': main_label, 'demographic_label': demog_label})
 
     return data
 
@@ -41,7 +54,7 @@ def read_vocab(in_f):
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    in_dir = arguments['--input_fir']
+    in_dir = arguments['--input_dir']
     vocab = read_vocab(in_dir + '/vocab')
 
     pos_pos = read_data_file(in_dir + '/pos_pos', vocab, 'positive', 'aa')
