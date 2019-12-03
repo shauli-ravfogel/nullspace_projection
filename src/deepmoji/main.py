@@ -47,12 +47,13 @@ def find_projection_matrices(X_train, Y_train, X_dev, Y_dev, dim, out_dir):
     for n in num_clfs:
         print("num classifiers: {}".format(n))
 
-        clf = SGDClassifier
-        # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
-        params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
+        clf = LinearSVC
+        # clf = SGDClassifier
+        params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
+        # params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
 
-        P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc, X_train, Y_train, X_dev, Y_dev,
-                                              noise=noise)
+        P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
+                                              X_train, Y_train, X_dev, Y_dev, noise=noise)
         fname = out_dir + "P.num-clfs={}.npy".format(n)
         np.save(fname, P_n)
 
