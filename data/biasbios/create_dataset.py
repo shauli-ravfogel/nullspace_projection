@@ -20,8 +20,8 @@ def load_data(fname = "BIOS.pkl"):
         
                 data = pickle.load(f)
 
-        print("Number of entries: {}".format(len(data)))
         return data
+
 def preprocess(data):
 
         # unite similar professions
