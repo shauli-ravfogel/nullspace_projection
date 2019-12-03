@@ -3,6 +3,8 @@ import sklearn
 from sklearn import model_selection
 import tqdm
 from collections import Counter
+import random
+import numpy as np
 
 PROFS = ['professor', 'physician', 'attorney', 'photographer', 'journalist', 'nurse', 'psychologist', 'teacher',
 'dentist', 'surgeon', 'architect', 'painter', 'model', 'poet', 'filmmaker', 'software_engineer',
@@ -66,6 +68,8 @@ def split_train_dev_test(data, vocab_size):
                 text_without_gender = entry["bio"]
                 all_data.append({"g": gender, "p": prof, "text": raw, "start": start_index, "hard_text": hard_text, "text_without_gender": text_without_gender})
 
+        random.seed(0)
+        np.random.seed(0)
         train_dev, test = sklearn.model_selection.train_test_split(all_data, test_size=0.25, random_state=0)
         train, dev = sklearn.model_selection.train_test_split(train_dev, test_size=0.1/0.75, random_state=0)
         print("Train size: {}; Dev size: {}; Test size: {}".format(len(train), len(dev), len(test)))
