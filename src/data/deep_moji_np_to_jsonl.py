@@ -10,9 +10,6 @@ Options:
 Script for collecting potential verbs from the aspecutal verbs list.
 """
 
-import json
-from typing import List, Dict
-
 import numpy as np
 from docopt import docopt
 
@@ -22,13 +19,7 @@ def read_data_file(input_file: str):
 
     np.random.shuffle(vecs)
 
-    return vecs[:30000], vecs[30000:32000], vecs[32000:35500]
-
-    # data = []
-    # for vec in vecs:
-    #     data.append({'vec': vec, 'main_label': main_label, 'demographic_label': demog_label})
-    #
-    # return data
+    return vecs[:40000], vecs[40000:42000], vecs[42000:44000]
 
 
 if __name__ == '__main__':
@@ -39,19 +30,6 @@ if __name__ == '__main__':
     out_dir = arguments['--output_dir']
 
     for split in ['pos_pos', 'pos_neg', 'neg_pos', 'neg_neg']:
-        data = read_data_file(in_dir + '/' + split + '.npy')
-        np.save(out_dir + '/' + split + '.npy')
-
-    # pos_pos = read_data_file(in_dir + '/pos_pos')
-    # pos_neg = read_data_file(in_dir + '/pos_neg')
-    # neg_pos = read_data_file(in_dir + '/neg_pos')
-    # neg_neg = read_data_file(in_dir + '/neg_neg')
-    #
-    # all_data = pos_pos + pos_neg + neg_pos + neg_neg
-    # np.random.shuffle(all_data)
-    #
-    # out_file = arguments['--output_file']
-    #
-    # with open(out_file, 'w') as f:
-    #     for line in all_data:
-    #         f.write(json.dumps(line) + '\n')
+        train, dev, test = read_data_file(in_dir + '/' + split + '.npy')
+        for split_dir, data in zip(['train', 'dev', 'test'], [train, dev, test]):
+            np.save(out_dir + '/' + split_dir + '/' + split + 'npy', data)
