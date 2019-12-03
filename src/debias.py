@@ -30,10 +30,10 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 
         P = np.eye(input_dim)
         for v in directions:
-        
+
                 P_v = get_nullspace_projection(v)
                 P = P.dot(P_v)
-        
+
         return P
 
 def get_debiasing_projection(classifier_class: classifier.Classifier, num_classifiers: int, input_dim: int, is_autoregressive: bool,
@@ -57,12 +57,12 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
     X_train_cp = X_train.copy()
     X_dev_cp = X_dev.copy()
     labels_set = list(set(Y_train.tolist()))
-    
+
     if noise:
         print("Adding noise.")
         mean = np.mean(np.abs(X_train))
         mask_train = 0.0075 * (np.random.rand(*X_train.shape) - 0.5)
-        
+
         X_train_cp += mask_train
 
 
@@ -70,39 +70,40 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
 
         if random_subset:
                 if regression: raise Exception("subset not implemened for regression")
-                
+
                 #idx = np.random.rand(X_train_cp.shape[0]) < 0.5
                 #x_t, y_t = X_train_cp[idx], Y_train[idx]
                 class_to_decrease = np.random.choice(labels_set)
                 idx_class =  Y_train == class_to_decrease
                 idx_to_remove = np.random.rand(X_train_cp.shape[0]) > 0.25
                 idx_to_maintain = idx_class*idx_to_remove + ~idx_class
-                
+
                 x_t, y_t = X_train_cp[idx_to_maintain], Y_train[idx_to_maintain]
         else:
-        
+
                 x_t,y_t = X_train_cp, Y_train
-                
+
         #clf = classifier_class()
         if np.random.random() < 0.0:
                 clf = svm_classifier.SVMClassifier(SGDClassifier(max_iter=2000, fit_intercept = True, penalty = "l2", n_jobs = 4))
                 #clf = svm_classifier.SVMClassifier(LinearDiscriminantAnalysis(n_components = 1))
                 #clf = svm_classifier.SVMClassifier(Perceptron(max_iter = 300))
         else:
-                clf = svm_classifier.SVMClassifier(LinearSVC(max_iter=35000, fit_intercept=True, class_weight="balanced", dual=False))
-        
+                # clf = svm_classifier.SVMClassifier(LinearSVC(max_iter=3000, fit_intercept=True, dual=False))
+                clf = svm_classifier.SVMClassifier(SGDClassifier(max_iter=300, fit_intercept = True, penalty = "l1", n_jobs = 64, verbose=10))
+
         if regression:
                 if np.random.random() < 0.5:
                         clf =  svm_classifier.SVMClassifier(SGDRegressor(average = True))
                 else:
                         clf = svm_classifier.SVMClassifier(SVR(max_iter=35000, kernel = "linear"))
-        
+
         if siamese and np.random.random() < 0.25: #i < int(num_classifiers/4):
                 if regression:
-                        raise Exception("subset not implemened for regression") 
-        
+                        raise Exception("subset not implemened for regression")
+
                 clf = Siamese(x_t, y_t, X_dev_cp, Y_dev, siamese_dim)
-                
+
 
         acc = clf.train_network(x_t, y_t, X_dev_cp, Y_dev)
         print("Iteration {}, Accuracy: {}".format(i, acc))
@@ -119,8 +120,8 @@ def get_debiasing_projection(classifier_class: classifier.Classifier, num_classi
             X_dev_cp = X_dev_cp.dot(P_i)
 
     return P
-    
-    
+
+
 if __name__ == '__main__':
     X = np.random.rand(5000,300)
     Y = np.random.rand(5000) < 0.5
@@ -132,13 +133,13 @@ if __name__ == '__main__':
     noise = False
     random_subset = True
     siamese = True
-    
+
     P = get_debiasing_projection(classifier_class, num_classifiers, input_dim, is_autoregressive, min_accuracy, X,Y,X,Y, noise = noise, random_subset = random_subset, siamese = siamese)
-    
+
     print(list(zip(X.dot(P)[0], X.dot(P).dot(P)[0]))[:10])
-    
-    print(list(zip(P[0], P.dot(P)[0]))[:10])   
+
+    print(list(zip(P[0], P.dot(P)[0]))[:10])
     #assert np.allclose(P.dot(P), P)
     #assert np.allclose(P.dot(P), P.T)
     print("yay")
-    
+

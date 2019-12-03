@@ -15,18 +15,18 @@ local data_path = "../data/emoji_sent_race/";
   },
   "iterator": {
     "type": "basic",
-    "batch_size": 32
+    "batch_size": 64
   },
   "trainer": {
-    "num_epochs": 50,
+    "num_epochs": 10,
     "grad_norm": 1.0,
-    "patience" : 20,
+    "patience" : 3,
     "cuda_device" : 0,
     "learning_rate_scheduler": {
       "type": "reduce_on_plateau",
       "factor": 0.5,
       "mode": "max",
-      "patience": 5
+      "patience": 2
     },
     "validation_metric": "+accuracy",
     "optimizer": {

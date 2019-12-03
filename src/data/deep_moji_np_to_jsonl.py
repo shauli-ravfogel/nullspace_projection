@@ -32,4 +32,4 @@ if __name__ == '__main__':
     for split in ['pos_pos', 'pos_neg', 'neg_pos', 'neg_neg']:
         train, dev, test = read_data_file(in_dir + '/' + split + '.npy')
         for split_dir, data in zip(['train', 'dev', 'test'], [train, dev, test]):
-            np.save(out_dir + '/' + split_dir + '/' + split + 'npy', data)
+            np.save(out_dir + '/' + split_dir + '/' + split + '.npy', data)

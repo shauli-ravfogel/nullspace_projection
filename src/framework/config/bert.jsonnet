@@ -1,4 +1,4 @@
-local data_path = "../data/sent_race.jsonl";
+local data_path = "../data/sent_race/";
 {
   "dataset_reader": {
     "type": "classification_reader",
@@ -35,7 +35,7 @@ local data_path = "../data/sent_race.jsonl";
   },
   "iterator": {
     "type": "basic",
-    "batch_size": 32
+    "batch_size":20 
   },
   "trainer": {
     "num_epochs": 50,

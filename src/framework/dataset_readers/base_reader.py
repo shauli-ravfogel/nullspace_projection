@@ -40,8 +40,6 @@ class ClassificationReader(DatasetReader):
                 label = curr_example_json['main_label']
                 yield self.text_to_instance(text,
                                             label)
-                if ind > 100:
-                    break
 
     @overrides
     def text_to_instance(self, text: str,

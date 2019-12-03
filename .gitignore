@@ -300,3 +300,9 @@ allen_logs/
 .idea/
 
 googlenews.50k.txt
+
+sent_race/
+
+data/emoji_sent_race_origin/
+data/emoji_sent_race_mlp/
+data/emoji_sent_race/
