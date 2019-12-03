@@ -76,6 +76,7 @@ def split_train_dev_test(data, vocab_size):
         pickle_data(test, "test")
         write_to_file(p2i, "profession2index")
         write_to_file(w2i, "word2index")
+        write_to_file(g2i, "gender2index")
 
 def main():
 
