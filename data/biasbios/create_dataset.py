@@ -39,9 +39,7 @@ def write_to_file(dictionary, name):
         with open(name+".txt", "w", encoding = "utf-8") as f:
 
                 for k,v in dictionary.items():
-                        if name == "word2index":
-                                print(k,v)
-                                print("--------------------")
+
                         f.write(str(k) + "\t" + str(v) + "\n")
 
 def split_train_dev_test(data, vocab_size):
@@ -77,7 +75,6 @@ def split_train_dev_test(data, vocab_size):
         pickle_data(dev, "dev")
         pickle_data(test, "test")
         write_to_file(p2i, "profession2index")
-        print(w2i)
         write_to_file(w2i, "word2index")
 
 def main():
