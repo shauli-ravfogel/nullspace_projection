@@ -1,4 +1,4 @@
-import classifier
+from src import classifier
 from sklearn.svm import LinearSVC, SVC
 from sklearn.linear_model import SGDClassifier
 import numpy as np
@@ -33,5 +33,5 @@ class SVMClassifier(classifier.Classifier):
         w = self.model.coef_
         if len(w.shape) == 1:
                 w  = np.expand_dims(w, 0)
-        
+
         return w

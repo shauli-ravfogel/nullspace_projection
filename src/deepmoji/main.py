@@ -20,18 +20,20 @@ from src import debias
 
 
 def load_data(path):
-    fnames = ["neg_neg.npy", "neg_pos.npy", "pos_neg.npy", "pos_pos.py"]
+    fnames = ["neg_neg.npy", "neg_pos.npy", "pos_neg.npy", "pos_pos.npy"]
     labels = [0, 1, 0, 1]
     X, Y = [], []
 
     for fname, label in zip(fnames, labels):
-
+        print(path + '/' + fname)
         data = np.load(path + '/' + fname)
         for x in data:
             X.append(x)
-        for Y in data:
+        for _ in data:
             Y.append(label)
 
+    Y = np.array(Y)
+    X = np.array(X)
     X, Y = shuffle(X, Y, random_state=0)
     return X, Y
 
