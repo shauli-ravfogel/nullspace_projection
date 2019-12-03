@@ -13,6 +13,7 @@ Script for collecting potential verbs from the aspecutal verbs list.
 import numpy as np
 from docopt import docopt
 from sklearn.svm import LinearSVC
+from sklearn.linear_model import SGDClassifier
 from sklearn.utils import shuffle
 
 from src import debias
@@ -44,8 +45,9 @@ def find_projection_matrices(X_train, Y_train, X_dev, Y_dev, dim, out_dir):
     for n in num_clfs:
         print("num classifiers: {}".format(n))
 
-        clf = LinearSVC
-        params = {'max_iter': 3000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
+        clf = SGDClassifier
+        # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
+        params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
 
         P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc, X_train, Y_train, X_dev, Y_dev,
                                               noise=noise)

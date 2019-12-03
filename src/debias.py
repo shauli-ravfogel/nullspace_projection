@@ -6,6 +6,7 @@ from src import svm_classifier
 
 REGRESSION = False
 from typing import List
+from tqdm import tqdm
 
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
@@ -60,18 +61,11 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         X_train_cp += mask_train
 
-    for i in range(num_classifiers):
+    for i in tqdm(range(num_classifiers)):
 
         x_t, y_t = X_train_cp, Y_train
 
-        # clf = classifier_class()
-        # if np.random.random() < 0.0:
-        # clf = svm_classifier.SVMClassifier(SGDClassifier(max_iter=2000, fit_intercept=True, penalty="l2", n_jobs=n_jobs))
-        # else:
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
-        # clf = svm_classifier.SVMClassifier(
-        #     LinearSVC(max_iter=35000, fit_intercept=True, class_weight="balanced", dual=False))
-        # x_t,y_t = X_train_cp, Y_train
 
         acc = clf.train_network(x_t, y_t, X_dev_cp, Y_dev)
         print("Iteration {}, Accuracy: {}".format(i, acc))
