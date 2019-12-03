@@ -1,6 +1,7 @@
 from typing import Dict
 
 import torch
+import torch.nn as nn
 from allennlp.data.vocabulary import Vocabulary
 from allennlp.models import Model
 from allennlp.modules.feedforward import FeedForward
@@ -37,11 +38,17 @@ class DeepMojiModel(Model):
         super().__init__(vocab)
         self.emb_size = emb_size
 
-        self.scorer = FeedForward(self.emb_size, num_layers=2,
-                                  hidden_dims=[300, 2], activations=[
-                                    Activation.by_name('tanh')(),
-                                    Activation.by_name('linear')()],
-                                  dropout=mlp_dropout)
+        layers = []
+        layers.append(nn.Linear(self.emb_size, 300))
+        layers.append(nn.Tanh())
+        layers.append(nn.Linear(300, 2))
+        self.scorer = nn.Sequential(*layers)
+
+        # self.scorer = FeedForward(self.emb_size, num_layers=2,
+        #                           hidden_dims=[300, 2], activations=[
+        #                             Activation.by_name('tanh')(),
+        #                             Activation.by_name('linear')()],
+        #                           dropout=mlp_dropout)
 
         self.loss = torch.nn.CrossEntropyLoss()
         self.metrics = {'accuracy': BooleanAccuracy(),
