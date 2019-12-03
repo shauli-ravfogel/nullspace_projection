@@ -44,12 +44,6 @@ class DeepMojiModel(Model):
         layers.append(nn.Linear(300, 2))
         self.scorer = nn.Sequential(*layers)
 
-        # self.scorer = FeedForward(self.emb_size, num_layers=2,
-        #                           hidden_dims=[300, 2], activations=[
-        #                             Activation.by_name('tanh')(),
-        #                             Activation.by_name('linear')()],
-        #                           dropout=mlp_dropout)
-
         self.loss = torch.nn.CrossEntropyLoss()
         self.metrics = {'accuracy': BooleanAccuracy(),
                         'f1': F1Measure(positive_label=1)}

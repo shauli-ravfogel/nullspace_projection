@@ -1,54 +1,66 @@
-import sys
-sys.path.append("..")
-import debias
+"""
+Usage:
+  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR]
+
+Options:
+  -h --help                     show this help message and exit
+  --input_dir=INPUT_DIR         input dir file
+  --output_dir=OUTPUT_DIR       write down output file
+
+Script for collecting potential verbs from the aspecutal verbs list.
+"""
+
 import numpy as np
-import sklearn
+from docopt import docopt
+from sklearn.svm import LinearSVC
 from sklearn.utils import shuffle
 
-def load_data(path):
+from src import debias
 
+
+def load_data(path):
     fnames = ["neg_neg.npy", "neg_pos.npy", "pos_neg.npy", "pos_pos.py"]
-    labels = [0,1,0,1]
+    labels = [0, 1, 0, 1]
     X, Y = [], []
 
     for fname, label in zip(fnames, labels):
 
-        data = np.load(fname)
+        data = np.load(path + '/' + fname)
         for x in data:
             X.append(x)
         for Y in data:
             Y.append(label)
 
-    X, Y = shuffle(X,Y, random_state = 0)
-    X_train, X_dev, y_train, y_dev = \
-        sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
-    return X_train, X_dev, y_train, y_dev
+    X, Y = shuffle(X, Y, random_state=0)
+    return X, Y
 
 
-def find_projection_matrices(X_train,Y_train, X_dev, Y_dev, dim = 2304, attribute = "race"):
-
+def find_projection_matrices(X_train, Y_train, X_dev, Y_dev, dim, out_dir):
     num_clfs = [5, 10, 25, 50, 80]
     is_autoregressive = True
-    siamese = False
-    reg = "l2"
     min_acc = 0.
     noise = False
-    random_subset = False
-    regression = False
 
     for n in num_clfs:
         print("num classifiers: {}".format(n))
 
-        P_n = debias.get_debiasing_projection(None, n, dim, is_autoregressive, min_acc, X_train, Y_train, X_dev, Y_dev,
-                                              noise = noise, random_subset = random_subset,
-                                              regression = regression, siamese = siamese, siamese_dim = 1)
-        fname = "matrices/P.num-clfs={}.attribute={}.npy".foramt(n, attribute)
-        with open(fname, "w") as f:
-            np.save(f, P_n)
+        clf = LinearSVC
+        params = {'max_iter': 3000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
+
+        P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc, X_train, Y_train, X_dev, Y_dev,
+                                              noise=noise)
+        fname = out_dir + "P.num-clfs={}.npy".format(n)
+        np.save(fname, P_n)
+
 
 if __name__ == '__main__':
+    arguments = docopt(__doc__)
 
-    data_type = sys.argv[1] # race/gender
-    path = "/home/nlp/lazary/workspace/thesis/shrink-task-learning/data/processed/emoji_{}".format(data_type)
-    X_train, X_dev, y_train, y_dev = load_data(path)
-    find_projection_matrices(X_train, y_train, X_dev, y_dev, attribute = data_type)
+    in_dir = arguments['--input_dir']
+
+    out_dir = arguments['--output_dir']
+
+    x_train, y_train = load_data(in_dir + '/train/')
+    x_dev, y_dev = load_data(in_dir + '/dev/')
+    find_projection_matrices(x_train, y_train, x_dev, y_dev, 300, out_dir)
+
