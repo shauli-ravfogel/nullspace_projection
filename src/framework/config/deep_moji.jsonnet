@@ -2,6 +2,7 @@ local data_path = "../data/emoji_sent_race/";
 {
   "dataset_reader": {
     "type": "deep_moji_reader",
+    "ratio": 0.5,
   },
   "train_data_path": data_path + "train",
   "validation_data_path": data_path + "dev",
@@ -11,16 +12,16 @@ local data_path = "../data/emoji_sent_race/";
   "model": {
     "type": "model_deep_moji",
     "emb_size": 2304,
-    "mlp_dropout": 0.2
+    "hidden_size": 300,
   },
   "iterator": {
     "type": "basic",
     "batch_size": 64
   },
   "trainer": {
-    "num_epochs": 10,
+    "num_epochs": 20,
     "grad_norm": 1.0,
-    "patience" : 3,
+    "patience" : 5,
     "cuda_device" : 0,
     "learning_rate_scheduler": {
       "type": "reduce_on_plateau",

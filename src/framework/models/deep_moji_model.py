@@ -4,8 +4,6 @@ import torch
 import torch.nn as nn
 from allennlp.data.vocabulary import Vocabulary
 from allennlp.models import Model
-from allennlp.modules.feedforward import FeedForward
-from allennlp.nn.activations import Activation
 from allennlp.training.metrics import BooleanAccuracy, F1Measure
 from overrides import overrides
 
@@ -25,23 +23,20 @@ class DeepMojiModel(Model):
     ----------
     vocab : ``Vocabulary``, required
         A Vocabulary, required in order to compute sizes for input/output projections.
-    text_field_embedder: ``TextFieldEmbedder``, required
-        Used to embed the ``tokens`` ``TextField`` we get as input to the model.
-    mlp_dropout: ``float``, required (default = 0.2)
-        The dropout probability of the mlp scorer.
     """
 
     def __init__(self,
                  vocab: Vocabulary,
                  emb_size: int,
-                 mlp_dropout: float = 0.2) -> None:
+                 hidden_size: int,
+                 ) -> None:
         super().__init__(vocab)
         self.emb_size = emb_size
 
         layers = []
-        layers.append(nn.Linear(self.emb_size, 300))
+        layers.append(nn.Linear(self.emb_size, hidden_size))
         layers.append(nn.Tanh())
-        layers.append(nn.Linear(300, 2))
+        layers.append(nn.Linear(hidden_size, 2))
         self.scorer = nn.Sequential(*layers)
 
         self.loss = torch.nn.CrossEntropyLoss()
@@ -50,27 +45,24 @@ class DeepMojiModel(Model):
 
     @overrides
     def forward(self,
-                vec: Dict[str, torch.Tensor],
+                vec: torch.Tensor,
                 label: torch.Tensor = None) -> Dict[str, torch.Tensor]:
         """
         Parameters
         ----------
-        text: Dict[str, torch.Tensor], required
-            The input sentence.
-        metadata: List[Dict[str, Any]], required
+        vec: torch.Tensor, required
+            The input vector.
         label: torch.Tensor, optional (default = None)
-            A variable representing the index of the correct label.
+            A variable of the correct label.
 
         Returns
         -------
         An output dictionary consisting of:
-        tag_logits: torch.FloatTensor, required
-            A tensor of shape ``(batch_size, max_sentence_length)``
-            representing a distribution over the label classes for each instance.
+        y_hat: torch.FloatTensor
+            the predicted values
         loss: torch.FloatTensor, optional
             A scalar loss to be optimised.
         """
-
         scores = self.scorer(vec)
         y_hat = torch.argmax(scores, dim=1)
 

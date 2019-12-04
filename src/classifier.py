@@ -9,7 +9,6 @@ class Classifier(object):
 
         pass
 
-
     def train(self, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray, Y_dev: np.ndarray) -> float:
         """
 
