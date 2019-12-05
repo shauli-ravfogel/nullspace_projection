@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     """
-
     :param W: the matrix over its nullspace to project
     :return: the projection matrix
     """
@@ -34,9 +33,8 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
-                             Y_dev: np.ndarray, noise=False) -> np.ndarray:
+                             Y_dev: np.ndarray, noise=False, random_subset = 1.) -> np.ndarray:
     """
-
     :param classifier_class:
     :param num_classifiers:
     :param input_dim:
@@ -67,7 +65,8 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
 
-        acc = clf.train_network(x_t, y_t, X_dev_cp, Y_dev)
+        idx = np.random.rand(x_y.shape[0]) < random_subset
+        acc = clf.train_network(x_t[idx], y_t[idx], X_dev_cp, Y_dev)
         print("Iteration {}, Accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
