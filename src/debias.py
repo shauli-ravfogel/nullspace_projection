@@ -65,7 +65,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
 
-        idx = np.random.rand(x_y.shape[0]) < random_subset
+        idx = np.random.rand(x_t.shape[0]) < random_subset
         acc = clf.train_network(x_t[idx], y_t[idx], X_dev_cp, Y_dev)
         print("Iteration {}, Accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
