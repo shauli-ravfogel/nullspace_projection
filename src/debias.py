@@ -3,11 +3,12 @@ from typing import Dict
 import numpy as np
 import scipy
 from src import svm_classifier
+#import svm_classifier
 
 REGRESSION = False
 from typing import List
 from tqdm import tqdm
-
+import random
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     """
@@ -33,7 +34,7 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
-                             Y_dev: np.ndarray, noise=False, random_subset = 1.) -> np.ndarray:
+                             Y_dev: np.ndarray, noise=False, random_subset = 1., by_class = True, Y_train_main=None, Y_dev_main=None) -> np.ndarray:
     """
     :param classifier_class:
     :param num_classifiers:
@@ -46,12 +47,15 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :param Y_dev:
     :return: the debiasing projection
     """
+    
+    if by_class and ((Y_train_main is None) or ( Y_dev_main is None)): raise Exception()
 
     P = np.eye(input_dim)
     X_train_cp = X_train.copy()
     X_dev_cp = X_dev.copy()
     labels_set = list(set(Y_train.tolist()))
-
+    main_task_labels = list(set(Y_train_main.tolist()))
+    
     if noise:
         print("Adding noise.")
         mean = np.mean(np.abs(X_train))
@@ -61,12 +65,23 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
     for i in tqdm(range(num_classifiers)):
 
-        x_t, y_t = X_train_cp, Y_train
+        x_t, y_t = X_train_cp.copy(), Y_train.copy()
 
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
 
         idx = np.random.rand(x_t.shape[0]) < random_subset
-        acc = clf.train_network(x_t[idx], y_t[idx], X_dev_cp, Y_dev)
+        x_t = x_t[idx]
+        y_t = y_t[idx]
+        
+        if by_class:
+                cls = np.random.choice(Y_train_main) #random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
+                relevant_idx_train = Y_train_main == cls
+                relevant_idx_dev = Y_dev_main == cls
+        else:
+                relevant_idx_train = np.ones(x_t.shape[0], dtype = bool)
+                relevant_idx_dev = np.ones(X_dev_cp.shape[0], dtype = bool)
+                
+        acc = clf.train_network(x_t[relevant_idx_train], y_t[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
         print("Iteration {}, Accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
@@ -94,7 +109,7 @@ if __name__ == '__main__':
     siamese = True
 
     P = get_debiasing_projection(classifier_class, None, num_classifiers, input_dim, is_autoregressive, min_accuracy,
-                                 X, Y, X, Y, noise=noise)
+                                 X, Y, X, Y, noise=noise, by_class = True)
 
     print(list(zip(X.dot(P)[0], X.dot(P).dot(P)[0]))[:10])
 
