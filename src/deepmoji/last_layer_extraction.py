@@ -1,7 +1,17 @@
-import sys
-import json
-from collections import defaultdict, Counter
-import itertools
+"""
+Usage:
+  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--model=MODEL]
+
+Options:
+  -h --help                     show this help message and exit
+  --input_dir=INPUT_DIR         input dir file
+  --output_dir=OUTPUT_DIR       write down output file
+  --model=MODEL                 the allennlp model file
+
+Script for collecting potential verbs from the aspecutal verbs list.
+"""
+
+from docopt import docopt
 
 from allennlp.models.archival import load_archive
 from allennlp.predictors import Predictor
@@ -16,15 +26,11 @@ from src.framework.models.deep_moji_model import DeepMojiModel
 from src.framework.dataset_readers.deep_moji_reader import DeepMojiReader
 
 
-archive_model = load_archive('src/allen_logs/deep_moji_balanced2/model.tar.gz')
-
-module = archive_model.extract_module('scorer')
-
-
 def transform_vec(in_vec, model):
     module = model.extract_module('scorer')
 
     x = torch.tensor(in_vec).float()
+    # running the first layer of the mlp and the activation function
     for layer in module[:2]:
         x = layer(x)
     return x
@@ -43,4 +49,15 @@ def calculate_vectors(in_dir, out_dir):
             np.save(out_dir + '/' + split + '/' + vectors + '.npy', transformed_vec)
 
 
-calculate_vectors('../data/emoji_sent_race/', '../data/emoji_sent_race_mlp')
+if __name__ == '__main__':
+    arguments = docopt(__doc__)
+
+    in_dir = arguments['--input_dir']
+    model_path = arguments['--model']
+
+    out_dir = arguments['--output_dir']
+
+    archive_model = load_archive(model_path)
+    module = archive_model.extract_module('scorer')
+
+    calculate_vectors(in_dir, out_dir)
