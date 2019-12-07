@@ -43,25 +43,26 @@ def load_data(path):
 
 
 def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected, dim, out_dir, Y_train_main, Y_dev_main):
-    num_clfs = [20, 50, 100]
+    # num_clfs = [20, 50, 100]
     is_autoregressive = True
     min_acc = 0.
     noise = False
 
-    for n in num_clfs:
-        print("num classifiers: {}".format(n))
+    # for n in num_clfs:
+    n = 200
+    print("num classifiers: {}".format(n))
 
-        # clf = LinearSVC
-        clf = SGDClassifier
-        # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
-        # params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
-        params = {'warm_start': True, 'loss': 'log', 'n_jobs': 64, 'max_iter': 75, 'random_state': 0}
+    # clf = LinearSVC
+    clf = SGDClassifier
+    # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
+    # params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
+    params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 200, 'random_state': 0, 'tol': 1e-3}
 
-        P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
-                                              X_train, Y_train_protected, X_dev, Y_dev_protected, noise=noise,
-                                              by_class=True, Y_train_main=Y_train_main, Y_dev_main=Y_dev_main)
-        fname = out_dir + "/P.num-clfs={}.npy".format(n)
-        np.save(fname, P_n)
+    P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
+                                          X_train, Y_train_protected, X_dev, Y_dev_protected, noise=noise,
+                                          by_class=True, Y_train_main=Y_train_main, Y_dev_main=Y_dev_main)
+    fname = out_dir + "/P.num-clfs={}.npy".format(n)
+    np.save(fname, P_n)
 
 
 if __name__ == '__main__':
