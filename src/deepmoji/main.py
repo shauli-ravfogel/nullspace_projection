@@ -1,13 +1,15 @@
 """
 Usage:
-  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR]
+  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--in_dim=IN_DIM] [--n=N]
 
 Options:
   -h --help                     show this help message and exit
   --input_dir=INPUT_DIR         input dir file
   --output_dir=OUTPUT_DIR       write down output file
+  --in_dim=IN_DIM               input dimension of the vectors [default: 300]
+  --n=N                         number of epochs to run classifier
 
-Script for collecting potential verbs from the aspecutal verbs list.
+Script for learning a debiasing matrix P from some vectors data
 """
 
 import numpy as np
@@ -42,21 +44,19 @@ def load_data(path):
     return X, Y_p, Y_m
 
 
-def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected, dim, out_dir, Y_train_main, Y_dev_main):
-    # num_clfs = [20, 50, 100]
+def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected, Y_train_main, Y_dev_main,
+                             dim, out_dir, n):
     is_autoregressive = True
     min_acc = 0.
     noise = False
 
-    # for n in num_clfs:
-    n = 200
     print("num classifiers: {}".format(n))
 
     # clf = LinearSVC
     clf = SGDClassifier
     # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
     # params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
-    params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 200, 'random_state': 0, 'tol': 1e-3}
+    params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 1200, 'random_state': 0, 'tol': 1e-3}
 
     P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
                                           X_train, Y_train_protected, X_dev, Y_dev_protected, noise=noise,
@@ -69,10 +69,12 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     in_dir = arguments['--input_dir']
-
     out_dir = arguments['--output_dir']
+    in_dim = arguments['--in_dim']
+    n = arguments['--n']
 
     x_train, y_train_protected, y_train_main = load_data(in_dir + '/train/')
     x_dev, y_dev_protected, y_dev_main = load_data(in_dir + '/dev/')
-    find_projection_matrices(x_train, y_train_protected, x_dev, y_dev_protected, 300, out_dir, y_train_main, y_dev_main)
+    find_projection_matrices(x_train, y_train_protected, x_dev, y_dev_protected, y_train_main, y_dev_main,
+                             in_dim, out_dir, n)
 
