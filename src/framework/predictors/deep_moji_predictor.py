@@ -7,7 +7,7 @@ from allennlp.predictors.predictor import Predictor
 
 @Predictor.register('deep_moji_predictor')
 class DeepMojiPredictor(Predictor):
-    """"Predictor wrapper for the base model"""
+    """"Predictor wrapper for the deep_moji_predictor model"""
     @overrides
     def _json_to_instance(self, json_dict: JsonDict) -> Instance:
         text = json_dict['text']

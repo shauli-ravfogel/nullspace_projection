@@ -28,6 +28,7 @@ class DeepMojiReader(DatasetReader):
     def _read(self, dir_path: str):
         logger.info("Reading instances from lines in file at: %s", dir_path)
 
+        # ratios for pos / neg
         n_1 = int(self.n * self.ratio / 2)
         n_2 = int(self.n * (1 - self.ratio) / 2)
 

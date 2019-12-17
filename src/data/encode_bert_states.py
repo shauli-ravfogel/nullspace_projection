@@ -8,6 +8,8 @@ Options:
   --output_dir=OUTPUT_DIR       write down output file
   --split=SPLIT                 split name
 
+Encoding text with Bert with two methods: average of all words,
+ and the cls token as sentence representation.
 """
 
 import numpy as np
@@ -64,14 +66,9 @@ if __name__ == '__main__':
     split = arguments['--split']
 
     model, tokenizer = load_lm()
-    # Encode text
-    input_ids = torch.tensor([tokenizer.encode("Here is some text to encode",
-                                               add_special_tokens=True)])
 
     data = read_data_file(in_file)
     tokens = tokenize(tokenizer, data)
-    with torch.no_grad():
-        last_hidden_states = model(input_ids)[0]  # Models outputs are now tuples
 
     avg_data, cls_data = encode_text(model, tokens)
 

@@ -1,13 +1,13 @@
 """
 Usage:
-  collect_aspectual.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR]
+  deepmoji_split.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR]
 
 Options:
   -h --help                     show this help message and exit
   --input_dir=INPUT_DIR         input dir file
   --output_dir=OUTPUT_DIR       write down output file
 
-Script for collecting potential verbs from the aspecutal verbs list.
+Script for converting the encoded deep_moji encoded vectors into train/dev/test splits
 """
 
 import numpy as np
@@ -26,7 +26,6 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     in_dir = arguments['--input_dir']
-
     out_dir = arguments['--output_dir']
 
     for split in ['pos_pos', 'pos_neg', 'neg_pos', 'neg_neg']:
