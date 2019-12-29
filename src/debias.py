@@ -33,34 +33,40 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
-                             Y_dev: np.ndarray, noise=False, random_subset=1., by_class=True, Y_train_main=None,
+                             Y_dev: np.ndarray, noise=False, by_class=True, Y_train_main=None,
                              Y_dev_main=None) -> np.ndarray:
     """
-    :param classifier_class:
-    :param num_classifiers:
-    :param input_dim:
-    :param is_autoregressive:
-    :param min_accuracy:
-    :param X_train:
-    :param Y_train:
-    :param X_dev:
-    :param Y_dev:
+    :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
+    :param cls_params: a dictionary, containing the params for the sklearn classifier
+    :param num_classifiers: number of iterations (equivalent to number of dimensions to remove)
+    :param input_dim: size of input vectors
+    :param is_autoregressive: whether to train the ith classiifer on the data projected to the nullsapces of w1,...,wi-1
+    :param min_accuracy: above this threshold, ignore the learned classifier
+    :param X_train: ndarray, training vectors
+    :param Y_train: ndarray, training labels (protected attributes)
+    :param X_dev: ndarray, eval vectors
+    :param Y_dev: ndarray, eval labels (protected attributes)
+    :param noise: bool, whether to add noise to the vectors
+    :param by_class: if true, at each iteration sample one main-task label, and extract the protected attribute only from vectors from this class
+    :param T_train_main: ndarray, main-task train labels
+    :param Y_dev_main: ndarray, main-task eval labels
     :return: the debiasing projection
     """
 
-    if by_class and ((Y_train_main is None) or (Y_dev_main is None)): raise Exception()
-
+    if by_class:
+        if ((Y_train_main is None) or (Y_dev_main is None)):
+            raise Exception("Need main-task labels for by-class training.)
+        main_task_labels = list(set(Y_train_main.tolist()))
+                            
     P = np.eye(input_dim)
     X_train_cp = X_train.copy()
     X_dev_cp = X_dev.copy()
     labels_set = list(set(Y_train.tolist()))
-    main_task_labels = list(set(Y_train_main.tolist()))
 
     if noise:
         print("Adding noise.")
         mean = np.mean(np.abs(X_train))
         mask_train = 0.0075 * (np.random.rand(*X_train.shape) - 0.5)
-
         X_train_cp += mask_train
 
     pbar = tqdm(range(num_classifiers))
@@ -80,7 +86,6 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         acc = clf.train_network(x_t[relevant_idx_train], y_t[relevant_idx_train], X_dev_cp[relevant_idx_dev],
                                 Y_dev[relevant_idx_dev])
-        # print("Iteration {}, Accuracy: {}".format(i, acc))
         pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
