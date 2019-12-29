@@ -73,10 +73,6 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
 
-        idx = np.random.rand(x_t.shape[0]) < random_subset
-        x_t = x_t[idx]
-        y_t = y_t[idx]
-
         if by_class:
             cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
             relevant_idx_train = Y_train_main == cls
