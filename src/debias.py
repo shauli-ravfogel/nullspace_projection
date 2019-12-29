@@ -61,8 +61,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     P = np.eye(input_dim)
     X_train_cp = X_train.copy()
     X_dev_cp = X_dev.copy()
-    labels_set = list(set(Y_train.tolist()))
-
+                            
     if noise:
         print("Adding noise.")
         mean = np.mean(np.abs(X_train))
