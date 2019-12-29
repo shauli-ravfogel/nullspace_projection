@@ -55,7 +55,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
     if by_class:
         if ((Y_train_main is None) or (Y_dev_main is None)):
-            raise Exception("Need main-task labels for by-class training.)
+            raise Exception("Need main-task labels for by-class training.")
         main_task_labels = list(set(Y_train_main.tolist()))
                             
     P = np.eye(input_dim)
