@@ -4,9 +4,6 @@ import numpy as np
 import scipy
 from src import svm_classifier
 
-# import svm_classifier
-
-REGRESSION = False
 from typing import List
 from tqdm import tqdm
 import random
