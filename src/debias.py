@@ -40,6 +40,7 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
 def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 
     rowspace_projections = []
+    I = np.eye(input_dim)
     
     for v in directions:
         P_v = get_rowspace_projection(v)
@@ -113,13 +114,12 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             to ensure numerical stability, explicitly project to the intersection of the nullspaces found so far (instaed of doing X = P_iX,
             which is problematic when w_i is not exactly orthogonal to w_i-1,...,w1, due to e.g inexact argmin calculation).
             """
-            
             # use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
             # N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
             
             Q = np.sum(rowspace_projections, axis = 0)
             P = I - get_rowspace_projection(Q)
-                 
+            
             # project  
                       
             X_train_cp = (P.dot(X_train.T)).T
@@ -134,9 +134,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     
     Q = np.sum(rowspace_projections, axis = 0)
     P = I - get_rowspace_projection(Q)
-    P_alternative = I - np.sum(rowspace_projections, axis = 0)
-    #print(np.allclose(P,P_alternative))
-    
+
     return P, rowspace_projections, Ws
 
 
