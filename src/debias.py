@@ -1,18 +1,13 @@
+
 from typing import Dict
 
 import numpy as np
 import scipy
-import svm_classifier
-#import svm_classifier
-from sklearn.svm import LinearSVC, SVC
-from sklearn.linear_model import Perceptron, SGDClassifier
-import matplotlib
-import matplotlib.pyplot as plt
-REGRESSION = False
+from src import svm_classifier
+
 from typing import List
 from tqdm import tqdm
 import random
-
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     """
@@ -43,11 +38,16 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
 
 
 def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
-    P = np.eye(input_dim)
-    for v in directions:
-        P_v = get_nullspace_projection(v)
-        P = P.dot(P_v)
 
+    rowspace_projections = []
+    
+    for v in directions:
+        P_v = get_rowspace_projection(v)
+        rowspace_projections.append(P_v)
+
+    Q = np.sum(rowspace_projections, axis = 0)
+    P = I - get_rowspace_projection(Q)
+    
     return P
 
 
@@ -110,9 +110,14 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
         if is_autoregressive:
             
-            # to ensure numerical stability, explicitly project to the intersection of the nullspaces found so far (instaed of doing X = P_iX, which is problematic when w_i is not exactly orthogonal to w_i-1,...,w1, due to e..g problems in finding the minimum
+            """
+            to ensure numerical stability, explicitly project to the intersection of the nullspaces found so far (instaed of doing X = P_iX,
+            which is problematic when w_i is not exactly orthogonal to w_i-1,...,w1, due to e..g problems in finding the minimum).
+            """
             
-            # use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
+            #use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
+            # N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
+            
             Q = np.sum(rowspace_projections, axis = 0)
             P = I - get_rowspace_projection(Q)
                  
