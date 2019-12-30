@@ -55,7 +55,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
                              Y_dev: np.ndarray, by_class=True, Y_train_main=None,
-                             Y_dev_main=None, by_rowspace = True) -> np.ndarray:
+                             Y_dev_main=None) -> np.ndarray:
     """
     :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
     :param cls_params: a dictionary, containing the params for the sklearn classifier
@@ -70,7 +70,6 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :param by_class: if true, at each iteration sample one main-task label, and extract the protected attribute only from vectors from this class
     :param T_train_main: ndarray, main-task train labels
     :param Y_dev_main: ndarray, main-task eval labels
-    :param by_rospace: bool. If true, calculate P_N(wi) by the relation P_N(wi) = I - P_(wi)
     :return: P, the debiasing projection; rowspace_projections, the list of all rowspace projection; Ws, the list of all calssifiers.
     """
     
