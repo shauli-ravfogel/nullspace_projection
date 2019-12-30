@@ -142,18 +142,54 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
 if __name__ == '__main__':
     N = 10000
-    d = 5
+    d = 300
     X = np.random.rand(N, d) - 0.5
     Y = np.array([1 if sum(x) > 0 else 0 for x in X]) #X < 0 #np.random.rand(N) < 0.5 #(X + 0.01 * (np.random.rand(*X.shape) - 0.5)) < 0 #np.random.rand(5000) < 0.5
     #Y = np.array(Y, dtype = int)
     
-    num_classifiers = 3
+    num_classifiers = 200
     classifier_class = SGDClassifier #Perceptron
     input_dim = d
     is_autoregressive = True
     min_accuracy = 0.0
-    noise = False
-    random_subset = True
     
-    P = get_debiasing_projection(classifier_class, {"max_iter": 15}, num_classifiers, input_dim, is_autoregressive, min_accuracy, X, Y, None, None, by_class = False)
+    P, rowspace_projections, Ws = get_debiasing_projection(classifier_class, {}, num_classifiers, input_dim, is_autoregressive, min_accuracy, X, Y, X, Y, by_class = False)
+    
+    I = np.eye(P.shape[0])
+    P_alternative = I - np.sum(rowspace_projections, axis = 0)
+    P_by_product = I.copy()
+    
+    for P_Rwi in rowspace_projections:
+    
+        P_Nwi = I - P_Rwi
+        P_by_product = P_Nwi.dot(P_by_product)
+        
+    
+    """testing"""
+    
+    # validate that P = PnPn-1...P2P1
+    
+    assert np.allclose(P_alternative, P) 
+    assert np.allclose(P_by_product, P)
+    
+    # validate that P is a projection
+     
+    assert np.allclose(P.dot(P), P) 
+    
+    # validate that P projects to N(w1)∩ N(w2) ∩ ... ∩ N(wn)
+    
+    x = np.random.rand(d) - 0.5
+    for w in Ws:
+    
+        assert np.allclose(np.linalg.norm(w.dot(P.dot(x))), 0.0)
+   
+    # validate that each two classifiers are orthogonal
+    
+    for i,w in enumerate(Ws):
+    
+        for j, w2 in enumerate(Ws):
+        
+                if i == j: continue
+                
+                assert np.allclose(np.linalg.norm(w.dot(w2.T)), 0) 
     
