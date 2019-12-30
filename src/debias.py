@@ -112,27 +112,32 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             
             """
             to ensure numerical stability, explicitly project to the intersection of the nullspaces found so far (instaed of doing X = P_iX,
-            which is problematic when w_i is not exactly orthogonal to w_i-1,...,w1, due to e..g problems in finding the minimum).
+            which is problematic when w_i is not exactly orthogonal to w_i-1,...,w1, due to e.g inexact argmin calculation).
             """
             
-            #use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
+            # use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
             # N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
             
             Q = np.sum(rowspace_projections, axis = 0)
             P = I - get_rowspace_projection(Q)
                  
-            # project            
+            # project  
+                      
             X_train_cp = (P.dot(X_train.T)).T
             X_dev_cp = (P.dot(X_dev.T)).T
 
-    # calculae final projection matrix P=P1P2..PN 
-    # since w_i.dot(w_i-1) = 0, P1P2 = P1 - P2 - I (proof in the paper); this is more numerically stable.
-    # by induction, P1P2..PN = I - (P1+..+PN). We will use instead Ben-Israel's formula to increase stability
+    """
+    calculae final projection matrix P=PnPn-1....P2P1
+    since w_i.dot(w_i-1) = 0, P2P1 = I - P1 - P2 (proof in the paper); this is more stable.
+    by induction, PnPn-1....P2P1 = I - (P1+..+PN). We will use instead Ben-Israel's formula to increase stability,
+    i.e., we explicitly project to intersection of all nullspaces (not very critical)
+    """
     
     Q = np.sum(rowspace_projections, axis = 0)
     P = I - get_rowspace_projection(Q)
-    P2 = I - np.sum(rowspace_projections, axis = 0)
-    print("test: {}".format(P2.dot(P2) - P2))
+    P_alternative = I - np.sum(rowspace_projections, axis = 0)
+    #print(np.allclose(P,P_alternative))
+    
     return P, rowspace_projections, Ws
 
 
