@@ -21,12 +21,21 @@ from tqdm import tqdm
 
 
 def read_data_file(input_file):
+    """
+    read the data file with a pickle format
+    :param input_file: input path, string
+    :return: the file's content
+    """
     with open(input_file, 'rb') as f:
         data = pickle.load(f)
     return data
 
 
 def load_lm():
+    """
+    load bert's language model
+    :return: the model and its corresponding tokenizer
+    """
     model_class, tokenizer_class, pretrained_weights = (BertModel, BertTokenizer, 'bert-base-uncased')
     tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
     model = model_class.from_pretrained(pretrained_weights)
@@ -34,6 +43,12 @@ def load_lm():
 
 
 def tokenize(tokenizer, data):
+    """
+    Iterate over the data and tokenize it. Sequences longer than 512 tokens are trimmed.
+    :param tokenizer: tokenizer to use for tokenization
+    :param data: data to tokenize
+    :return: a list of the entire tokenized data
+    """
     tokenized_data = []
     for row in tqdm(data):
         tokens = tokenizer.encode(row['hard_text_untokenized'], add_special_tokens=True)
@@ -43,6 +58,14 @@ def tokenize(tokenizer, data):
 
 
 def encode_text(model, data):
+    """
+    encode the text
+    :param model: encoding model
+    :param data: data
+    :return: two numpy matrices of the data:
+                first: average of all tokens in each sentence
+                second: cls token of each sentence
+    """
     all_data_cls = []
     all_data_avg = []
     batch = []

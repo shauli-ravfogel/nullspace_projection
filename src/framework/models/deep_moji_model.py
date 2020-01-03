@@ -11,7 +11,7 @@ from overrides import overrides
 @Model.register("model_deep_moji")
 class DeepMojiModel(Model):
     """
-    simple MLP model
+    simple MLP model, that operates over encoded states
 
     Parameters
     ----------

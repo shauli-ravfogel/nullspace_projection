@@ -1,29 +1,17 @@
 # NullSpace
 
 
-## Word Embedding experiments
-
-## Bias Bios experiments
-```
-mkdir data/bert_encode_biasbios
-
-python src/data/encode_bert_states.py \
-        --input_file data/biasbios/train.pickle \
-        --output_dir data/bert_encode_biasbios/ \
-        --split train
-
-python src/data/encode_bert_states.py \
-        --input_file data/biasbios/dev.pickle \
-        --output_dir data/bert_encode_biasbios/ \
-        --split dev
-
-python src/data/encode_bert_states.py \
-        --input_file data/biasbios/test.pickle \
-        --output_dir data/bert_encode_biasbios/ \
-        --split test
+Start a new virtual environment:
+```sh
+conda create -n null_space python=3.7 anaconda
+conda activate null_space
 ```
 
-## Controlled Demographic experiments
+
+## Word Embedding experiments (Section 6.1 in the paper)
+TODO - complete
+
+## Controlled Demographic experiments (Section 6.2 in the paper)
 
 ```py
 python src/data/deepmoji_split.py \
@@ -34,3 +22,11 @@ python src/data/deepmoji_split.py \
 ```sh 
 ./run_deepmoji_debiasing.sh
 ```
+
+
+## Bias Bios experiments (Section 6.3 in the paper)
+
+```sh
+./run_bias_bios.sh
+```
+

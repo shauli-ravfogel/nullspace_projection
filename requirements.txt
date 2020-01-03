@@ -1,0 +1,9 @@
+allennlp
+transformers
+pickle
+tqdm
+numpy
+docopt
+
+scikit-learn
+torch
