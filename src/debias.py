@@ -1,13 +1,13 @@
 
 from typing import Dict
-
 import numpy as np
 import scipy
 from src import svm_classifier
-
 from typing import List
 from tqdm import tqdm
 import random
+import warnings
+
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
     """
@@ -56,7 +56,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
                              Y_dev: np.ndarray, by_class=True, Y_train_main=None,
-                             Y_dev_main=None) -> np.ndarray:
+                             Y_dev_main=None, dropout_rate = 0) -> np.ndarray:
     """
     :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
     :param cls_params: a dictionary, containing the params for the sklearn classifier
@@ -71,8 +71,11 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :param by_class: if true, at each iteration sample one main-task label, and extract the protected attribute only from vectors from this class
     :param T_train_main: ndarray, main-task train labels
     :param Y_dev_main: ndarray, main-task eval labels
+    :param dropout_rate: float, default: 0 (note: not recommended to be used with autoregressive=True)
     :return: P, the debiasing projection; rowspace_projections, the list of all rowspace projection; Ws, the list of all calssifiers.
     """
+    if dropout_rate > 0 and is_autoregressive:
+        warnings.warn("Dropout is not recommended with autoregressive training, as it violates the propety w_i.dot(w_(i+1)) = 0 that is necessary for a mathematically valid projection.")
     
     I = np.eye(input_dim)
     
@@ -90,7 +93,8 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     for i in pbar:
         
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
-
+        dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float)
+        
         if by_class:
             cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
             relevant_idx_train = Y_train_main == cls
@@ -99,7 +103,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             relevant_idx_train = np.ones(X_train_cp.shape[0], dtype=bool)
             relevant_idx_dev = np.ones(X_dev_cp.shape[0], dtype=bool)
 
-        acc = clf.train_network(X_train_cp[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
+        acc = clf.train_network((X_train_cp * dropout_mask)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
         pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
