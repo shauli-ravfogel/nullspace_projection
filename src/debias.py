@@ -169,7 +169,7 @@ if __name__ == '__main__':
     
     """testing"""
     
-    # validate that P = PnPn-1...P2P1 (should be true only when w_i.dot(w_(i+1)) = 0)
+    # validate that P = PnPn-1...P2P1 (should be true only when w_i.dot(w_(i+1)) = 0, in autoregressive training)
     
     if is_autoregressive:
         assert np.allclose(P_alternative, P) 
@@ -186,11 +186,12 @@ if __name__ == '__main__':
     
         assert np.allclose(np.linalg.norm(w.dot(P.dot(x))), 0.0)
    
-    # validate that each two classifiers are orthogonal
+    # validate that each two classifiers are orthogonal (this is expected to be true only with autoregressive training)
     
-    for i,w in enumerate(Ws):
+    if is_autoregressive:
+        for i,w in enumerate(Ws):
     
-        for j, w2 in enumerate(Ws):
+            for j, w2 in enumerate(Ws):
         
                 if i == j: continue
                 
