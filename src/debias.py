@@ -169,10 +169,11 @@ if __name__ == '__main__':
     
     """testing"""
     
-    # validate that P = PnPn-1...P2P1
+    # validate that P = PnPn-1...P2P1 (should be true only when w_i.dot(w_(i+1)) = 0)
     
-    assert np.allclose(P_alternative, P) 
-    assert np.allclose(P_by_product, P)
+    if is_autoregressive:
+        assert np.allclose(P_alternative, P) 
+        assert np.allclose(P_by_product, P)
     
     # validate that P is a projection
      
