@@ -94,7 +94,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
         
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
         dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float)
-        dropout_scale = 1./(1-rate)
+        dropout_scale = 1./(1-rate + 1e-6)
         
         if by_class:
             cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
