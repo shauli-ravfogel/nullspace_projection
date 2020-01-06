@@ -75,7 +75,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :return: P, the debiasing projection; rowspace_projections, the list of all rowspace projection; Ws, the list of all calssifiers.
     """
     if dropout_rate > 0 and is_autoregressive:
-        warnings.warn("Dropout is not recommended with autoregressive training, as it violates the propety w_i.dot(w_(i+1)) = 0 that is necessary for a mathematically valid projection.")
+        warnings.warn("Note: when using dropout with autoregressive training, the property w_i.dot(w_(i+1)) = 0 no longer holds.")
     
     I = np.eye(input_dim)
     
