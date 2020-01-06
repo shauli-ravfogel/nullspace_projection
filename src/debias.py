@@ -94,6 +94,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
         
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
         dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float)
+        dropout_scale = 1./(1-rate)
         
         if by_class:
             cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
@@ -103,8 +104,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             relevant_idx_train = np.ones(X_train_cp.shape[0], dtype=bool)
             relevant_idx_dev = np.ones(X_dev_cp.shape[0], dtype=bool)
 
-        acc = clf.train_network((X_train_cp * dropout_mask)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
-        pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
+        acc = clf.train_network((X_train_cp * dropout_mask/dropout_scale)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])        pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
         W = clf.get_weights()
