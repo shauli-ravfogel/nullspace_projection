@@ -24,7 +24,9 @@ python src/data/filter_vecs.py \
 ```py
 python src/data/deepmoji_split.py \
         --input_dir data/deepmoji/ \
-        --output_dir data/deepmoji/
+        --output_dir data/deepmoji/ \
+        --keep-inherently-gendered \
+        --keep-names
 ```
 
 ```sh 
