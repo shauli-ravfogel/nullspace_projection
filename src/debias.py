@@ -93,7 +93,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     for i in pbar:
         
         clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
-        dropout_scale = 1./(1-rate + 1e-6)
+        dropout_scale = 1./(1 - dropout_rate + 1e-6)
         dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float) * dropout_scale
         
         
