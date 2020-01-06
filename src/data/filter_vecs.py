@@ -138,8 +138,8 @@ def main():
                                                   
     model, vecs, words = load_model(args.input_path, binary = False)
     (vecs, words), (words_gendered, vecs_gendered) = filter_vecs(vecs, words, args.keep_gendered, args.keep_names)
-    save_in_word2vec_format(vecs[:args.top_k], words[:args.top_k], args.output_dir + "vecs.filtered.glove2.txt")
-    save_in_word2vec_format(vecs_gendered, words_gendered, args.output_dir + "vecs.gendered.glove2.txt")
+    save_in_word2vec_format(vecs[:args.top_k], words[:args.top_k], args.output_dir + "vecs.filtered.txt")
+    save_in_word2vec_format(vecs_gendered, words_gendered, args.output_dir + "vecs.gendered.txt")
     save_voc(words[:args.top_k], args.output_dir + "voc.txt")
     
 if __name__ == '__main__':
