@@ -105,7 +105,8 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             relevant_idx_train = np.ones(X_train_cp.shape[0], dtype=bool)
             relevant_idx_dev = np.ones(X_dev_cp.shape[0], dtype=bool)
 
-        acc = clf.train_network((X_train_cp * dropout_mask)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])        pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
+        acc = clf.train_network((X_train_cp * dropout_mask)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
+        pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
         W = clf.get_weights()
