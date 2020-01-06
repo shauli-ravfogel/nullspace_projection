@@ -9,7 +9,15 @@ conda activate null_space
 
 
 ## Word Embedding experiments (Section 6.1 in the paper)
-TODO - complete
+
+Assumes uncased Common Crawl GloVe vectors saved at `data/embeddings`.
+
+```py
+python src/data/filter_vecs.py \
+        --input-path data/embeddings/glove.42B.300d.txt \
+        --output_dir data/embeddings/
+        --top-k 150000
+```
 
 ## Controlled Demographic experiments (Section 6.2 in the paper)
 
