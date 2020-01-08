@@ -10,13 +10,12 @@ import warnings
 
 
 def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
+    # NOT IN USE
     """
     :param W: the matrix over its nullspace to project
     :return: the projection matrix
     """
     nullspace_basis = scipy.linalg.null_space(W)  # orthogonal basis
-    print(nullspace_basis)
-    exit()
     nullspace_basis = nullspace_basis * np.sign(nullspace_basis[0][0])  # handle sign ambiguity
     projection_matrix = nullspace_basis.dot(nullspace_basis.T)
 
@@ -29,11 +28,17 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     :return: the projection matrix
     """
 
-    w_basis = scipy.linalg.orth(W.T) # orthogonal basis
+    if np.allclose(W, 0):
+        w_basis = np.zeros_like(W.T)
+    else:
+        w_basis = scipy.linalg.orth(W.T) # orthogonal basis
+    
     w_basis * np.sign(w_basis[0][0]) # handle sign ambiguity
     P_W = w_basis.dot(w_basis.T) # orthogonal projection on W's rowspace
     
     return P_W
+
+
 
 
 
