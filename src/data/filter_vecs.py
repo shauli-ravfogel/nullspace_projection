@@ -11,6 +11,11 @@ import sys
 from typing import List
 
 def get_excluded_words():
+    """
+    :return: excluded words, a list of words we possibly want to remove.
+             the list of excluded words is based on Gonen et at. 2019 and contains gender specific words.
+
+    """
     with codecs.open('../lists/gender_specific_full.json') as f:
         gender_specific = json.load(f)
     with codecs.open('../lists/definitional_pairs.json') as f:
@@ -27,14 +32,22 @@ def get_excluded_words():
     return exclude_words
 
 def get_names():
-
+        """
+        A list of gender-specific first names.
+        """
         with open("../lists/first_names_clean.txt", "r") as f:
                 lines = f.readlines()
         
         names = [l.strip().lower() for l in lines]
         return names
         
-def load_model(fname, binary):
+def load_model(fname, binary) -> Tuple[gensim.models.keyedvectors.WordEmbeddingsKeyedVectors, List[np.ndarray], List[str]]:
+    """
+    :param fname: str, the filename of the embeddings file
+    :param binary: whether the format is binary
+    :return: a tuple model:gensim.models.keyedvectors.WordEmbeddingsKeyedVectors, vecs: list of np arrays,
+            wordS: list of strings
+    """
     model = KeyedVectors.load_word2vec_format(fname, binary=binary)
     vecs = model.vectors
     words = list(model.vocab.keys())
@@ -42,20 +55,34 @@ def load_model(fname, binary):
     return model, vecs, words
 
 
-def has_punct(w):
+def has_punct(w: str):
+    """
+    :param w: a word
+    :return: True if contains punctuation, False otherwise
+    """
     if any([c in string.punctuation for c in w]):
         return True
     return False
 
 
 def has_digit(w):
+    """
+
+    :param w: a word
+    :return: True if contains digit, False otherwise
+    """
     if any([c in '0123456789' for c in w]):
         return True
     return False
 
 def save_in_word2vec_format(vecs: np.ndarray, words: np.ndarray, fname: str):
-
-
+    """
+    :param vecs: np array of vectors
+    :param words: np array of strings
+    :param fname: fname to save
+    :return:
+    saves the vectors in a word2vec format
+    """
     with open(fname, "w") as f:
 
         f.write(str(len(vecs)) + " " + "300" + "\n")
@@ -65,6 +92,14 @@ def save_in_word2vec_format(vecs: np.ndarray, words: np.ndarray, fname: str):
             f.write(w + " " + vec_as_str + "\n")
 
 def filter_vecs(vecs: np.ndarray, words: np.ndarray, keep_gendered: bool, keep_names: bool):
+    """
+
+    :param vecs: the complete set of pretrained vectors
+    :param words: the corresponding words
+    :param keep_gendered: whether or not to keep inherently gendered words
+    :param keep_names:  whether or not to keep names
+    :return: two tuples, one contains the filtered vecs and words, the other only the gendered ones
+    """
 
     filtered = []
     gendered_words = []
@@ -107,7 +142,12 @@ def filter_vecs(vecs: np.ndarray, words: np.ndarray, keep_gendered: bool, keep_n
     return (vecs, words), (words_gendered, vecs_gendered)
 
 def save_voc(voc: List[str], path: str):
+        """
 
+        :param voc: list of words in the vocab
+        :param path: path to save
+        :return:
+        """
         with open(path, "w", encoding = "utf-8") as f:
         
                 for w in voc:
