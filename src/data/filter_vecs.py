@@ -18,17 +18,8 @@ def get_excluded_words():
     """
     with codecs.open('../lists/gender_specific_full.json') as f:
         gender_specific = json.load(f)
-    with codecs.open('../lists/definitional_pairs.json') as f:
-        definitional_pairs = json.load(f)
-    with codecs.open('../lists/equalize_pairs.json') as f:
-        equalize_pairs = json.load(f)
 
-    exclude_words = []
-    for pair in definitional_pairs + equalize_pairs:
-        exclude_words.append(pair[0])
-        exclude_words.append(pair[1])
-
-    exclude_words = list(set(exclude_words).union(set(gender_specific)))
+    exclude_words = list(set(gender_specific))
     return exclude_words
 
 def get_names():
