@@ -36,6 +36,17 @@ python src/data/deepmoji_split.py \
 
 ## Bias Bios experiments (Section 6.3 in the paper)
 
+Assumes the bias-in-bios dataset from [De-Arteaga, Maria, et al. 2019](https://arxiv.org/abs/1901.09451) saved at `data/biasbios/BIOS.pkl`.
+
+
+```py
+python src/data/create_dataset_biasbios.py \
+        --input-path data/biasbios/BIOS.pkl \
+        --output_dir data/biasbios/ \
+        --vocab-size 250000
+```
+
+        
 ```sh
 ./run_bias_bios.sh
 ```
