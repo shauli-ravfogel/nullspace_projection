@@ -5,27 +5,36 @@ import tqdm
 from collections import Counter
 import random
 import numpy as np
+from typing import List, Dict
+import argparse
 
 PROFS = ['professor', 'physician', 'attorney', 'photographer', 'journalist', 'nurse', 'psychologist', 'teacher',
 'dentist', 'surgeon', 'architect', 'painter', 'model', 'poet', 'filmmaker', 'software_engineer',
 'accountant', 'composer', 'dietitian', 'comedian', 'chiropractor', 'pastor', 'paralegal', 'yoga_teacher',
 'dj', 'interior_designer', 'personal_trainer', 'rapper']
 
+# a dictionary for uniting similar professions, according to De-Arteaga, Maria, et al. 2019
 PROF2UNIFIED_PROF = {"associate professor": "professor", "assistant professor": "professor", "software engineer": "software_engineer", "psychotherapist": "psychologist", "orthopedic surgeon": "surgeon", "trial lawyer": "attorney","plastic surgeon": "surgeon",  "trial attorney": "attorney", "senior software engineer": "software_engineer", "interior designer": "interior_designer", "certified public accountant": "accountant", "cpa": "accountant", "neurosurgeon": "surgeon", "yoga teacher": "yoga_teacher", "nutritionist": "dietitian", "personal trainer": "personal_trainer", "certified personal trainer": "personal_trainer", "yoga instructor": "yoga_teacher"}
 
 
-def load_data(fname = "BIOS.pkl"):
-
+def load_data(fname):
+        """
+        Load the BIOS dataset from De-Arteaga, Maria, et al. 2019
+        """
         with open(fname, "rb") as f:
 
                 data = pickle.load(f)
 
         return data
 
-def preprocess(data):
+def preprocess(data: List[dict]):
 
         # unite similar professions
-
+        """
+        :param data: List[dictionary]
+        :return: none
+        changes the data dictionaries in place, uniting similar professions.
+        """
         for i, data_dict in enumerate(data):
                 prof = data_dict["raw_title"].lower()
                 data[i]["raw_title"] = PROF2UNIFIED_PROF[prof] if prof in PROF2UNIFIED_PROF else prof
@@ -42,7 +51,13 @@ def write_to_file(dictionary, name):
 
                         f.write(str(k) + "\t" + str(v) + "\n")
 
-def split_train_dev_test(data, vocab_size):
+def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
+        """
+
+        :param data: list of dictionaries, each containing the biography of a single person
+        :param vocab_size: how many words to keep
+        :return: none. writes the dataset to files
+        """
         g2i, i2g = {"m": 0, "f": 1}, {1: "f", 0: "m"}
         all_profs = list(set([d["raw_title"] for d in data]))
         all_words = []
@@ -60,10 +75,9 @@ def split_train_dev_test(data, vocab_size):
         all_data = []
         for entry in tqdm.tqdm(data, total=len(data)):
                 gender, prof = entry["gender"].lower(), entry["raw_title"].lower()
-                # if prof in PROF2UNITED_PROF: prof = PROF2UNITED_PROF[prof]
                 raw, start_index = entry["raw"], entry["start_pos"]
-                hard_text = raw[start_index + 1:]
-                text_without_gender = entry["bio"]
+                hard_text = raw[start_index + 1:] # the biography without the first line
+                text_without_gender = entry["bio"] # the text, with all gendered words and names removed
                 all_data.append({"g": gender, "p": prof, "text": raw, "start": start_index, "hard_text": hard_text, "text_without_gender": text_without_gender})
 
         random.seed(0)
@@ -71,18 +85,31 @@ def split_train_dev_test(data, vocab_size):
         train_dev, test = sklearn.model_selection.train_test_split(all_data, test_size=0.25, random_state=0)
         train, dev = sklearn.model_selection.train_test_split(train_dev, test_size=0.1/0.75, random_state=0)
         print("Train size: {}; Dev size: {}; Test size: {}".format(len(train), len(dev), len(test)))
-        pickle_data(train, "train")
-        pickle_data(dev, "dev")
-        pickle_data(test, "test")
-        write_to_file(p2i, "profession2index")
-        write_to_file(w2i, "word2index")
-        write_to_file(g2i, "gender2index")
+        pickle_data(train, output_dir + "train")
+        pickle_data(dev, output_dir + "dev")
+        pickle_data(test, output_dir + "test")
+        write_to_file(p2i, output_dir + "profession2index")
+        write_to_file(w2i, output_dir + "word2index")
+        write_to_file(g2i, output_dir + "gender2index")
 
 def main():
+        parser = argparse.ArgumentParser(
+                description='Creating a dataset for the bias-in-bios experiments.',
+                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument('--input-path', dest='input_path', type=str,
+                            default='../../data/biasbios/BIOS.pkl',
+                            help='path to bios dataset of De-Arteaga, Maria, et al. 2019')
+        parser.add_argument('--output-dir', dest='output_dir', type=str,
+                            default="../../data/biasbios/",
+                            help='output directory.')
+        parser.add_argument('--vocab-size', dest='vocab_size', type=int,
+                            default=250000,
+                            help='how many words to keep.')
+        args = parser.parse_args()
 
-        data = load_data()
+        data = load_data(args.input_path)
         preprocess(data)
-        split_train_dev_test(data, vocab_size = 250000)
+        split_train_dev_test(data = data, output_dir = args.output_dir, vocab_size = args.vocab_size)
 
 if __name__ == '__main__':
     main() 
