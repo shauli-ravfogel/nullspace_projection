@@ -27,7 +27,12 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
 
 
 def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
-
+    """
+    the aim of this function is to perform INLP on a set of user-provided directiosn (instead of learning those directions.
+    :param directions: list of vectors, as numpy arrays.
+    :param input_dim: dimensionality of the vectors.
+    """
+    
     rowspace_projections = []
     I = np.eye(input_dim)
     
