@@ -8,19 +8,6 @@ from tqdm import tqdm
 import random
 import warnings
 
-
-def get_nullspace_projection(W: np.ndarray) -> np.ndarray:
-    # NOT IN USE
-    """
-    :param W: the matrix over its nullspace to project
-    :return: the projection matrix
-    """
-    nullspace_basis = scipy.linalg.null_space(W)  # orthogonal basis
-    nullspace_basis = nullspace_basis * np.sign(nullspace_basis[0][0])  # handle sign ambiguity
-    projection_matrix = nullspace_basis.dot(nullspace_basis.T)
-
-    return projection_matrix
-    
     
 def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     """
@@ -37,9 +24,6 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     P_W = w_basis.dot(w_basis.T) # orthogonal projection on W's rowspace
     
     return P_W
-
-
-
 
 
 def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
