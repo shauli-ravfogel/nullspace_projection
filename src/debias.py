@@ -2,7 +2,7 @@
 from typing import Dict
 import numpy as np
 import scipy
-from src import svm_classifier
+from src import classifier
 from typing import List
 from tqdm import tqdm
 import random
@@ -86,7 +86,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     pbar = tqdm(range(num_classifiers))
     for i in pbar:
         
-        clf = svm_classifier.SVMClassifier(classifier_class(**cls_params))
+        clf = classifier.SKlearnClassifier(classifier_class(**cls_params))
         dropout_scale = 1./(1 - dropout_rate + 1e-6)
         dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float) * dropout_scale
         
@@ -139,6 +139,9 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
 
 
 if __name__ == '__main__':
+    
+    from sklearn.linear_model import SGDClassifier, Perceptron, LogisticRegression
+        
     N = 10000
     d = 300
     X = np.random.rand(N, d) - 0.5
