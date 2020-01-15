@@ -25,7 +25,7 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     
     return P_W
 
-def get_projection_to_intersection_of_nullspaces(rowspace_projection_matrices: List[np.ndarray], dim: int):
+def get_projection_to_intersection_of_nullspaces(rowspace_projection_matrices: List[np.ndarray], input_dim: int):
     """
     Given a list of rowspace projection matrices P_R(w_1), ..., P_R(w_n),
     this function calculates the projection to the intersection of all nullspasces of the matrices w_1, ..., w_n.
