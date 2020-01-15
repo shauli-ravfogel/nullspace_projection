@@ -12,7 +12,7 @@ import warnings
 def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     """
     :param W: the matrix over its nullspace to project
-    :return: the projection matrix
+    :return: the projection matrix over the rowspace
     """
 
     if np.allclose(W, 0):
@@ -25,23 +25,36 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     
     return P_W
 
-
+def get_projection_to_intersection_of_nullspaces(rowspace_projection_matrices: List[np.ndarray], dim: int):
+    """
+    Given a list of rowspace projection matrices P_R(w_1), ..., P_R(w_n),
+    this function calculates the projection to the intersection of all nullspasces of the matrices w_1, ..., w_n.
+    uses the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
+    N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
+    :param rowspace_projection_matrices: List[np.array], a list of rowspace projections
+    :param dim: input dim
+    """
+    
+    I = np.eye(input_dim)
+    Q = np.sum(rowspace_projection_matrices, axis = 0)
+    P = I - get_rowspace_projection(Q)
+    
+    return P
+    
 def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
     """
-    the aim of this function is to perform INLP on a set of user-provided directiosn (instead of learning those directions.
+    the goal of this function is to perform INLP on a set of user-provided directiosn (instead of learning those directions).
     :param directions: list of vectors, as numpy arrays.
     :param input_dim: dimensionality of the vectors.
     """
     
     rowspace_projections = []
-    I = np.eye(input_dim)
     
     for v in directions:
         P_v = get_rowspace_projection(v)
         rowspace_projections.append(P_v)
 
-    Q = np.sum(rowspace_projections, axis = 0)
-    P = I - get_rowspace_projection(Q)
+    P = get_projection_to_intersection_of_nullspaces(rowspace_projections, input_dim)
     
     return P
 
@@ -117,9 +130,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             # use the intersection-projection formula of Ben-Israel 2013 http://benisrael.net/BEN-ISRAEL-NOV-30-13.pdf: 
             # N(w1)∩ N(w2) ∩ ... ∩ N(wn) = N(P_R(w1) + P_R(w2) + ... + P_R(wn))
             
-            Q = np.sum(rowspace_projections, axis = 0)
-            P = I - get_rowspace_projection(Q)
-            
+            P = get_projection_to_intersection_of_nullspaces(rowspace_projections, input_dim)
             # project  
                       
             X_train_cp = (P.dot(X_train.T)).T
@@ -129,11 +140,10 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     calculae final projection matrix P=PnPn-1....P2P1
     since w_i.dot(w_i-1) = 0, P2P1 = I - P1 - P2 (proof in the paper); this is more stable.
     by induction, PnPn-1....P2P1 = I - (P1+..+PN). We will use instead Ben-Israel's formula to increase stability,
-    i.e., we explicitly project to intersection of all nullspaces (not very critical)
+    i.e., we explicitly project to intersection of all nullspaces (this is not critical at this point; I-(P1+...+PN) is roughly as accurate as this)
     """
     
-    Q = np.sum(rowspace_projections, axis = 0)
-    P = I - get_rowspace_projection(Q)
+    P = get_projection_to_intersection_of_nullspaces(rowspace_projections, input_dim)
 
     return P, rowspace_projections, Ws
 
