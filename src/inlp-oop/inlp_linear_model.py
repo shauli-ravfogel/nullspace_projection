@@ -9,7 +9,7 @@ class LinearModel(object):
 
         pass
 
-    def train(self, dataset_handler: inlp_dataset_handler.DatasetHandler) -> float:
+    def train_model(self, dataset_handler: inlp_dataset_handler.DatasetHandler) -> float:
         """
 
         :param dataset_handler: an instance of DatasetHandler
@@ -30,13 +30,19 @@ class LinearModel(object):
 
 class SKlearnClassifier(LinearModel):
 
-    def __init__(self, m):
+    def __init__(self, model_class, model_params):
+        self.model_class = model_class
+        self.model_params = model_params
+        self.initialize_model()
 
-        self.model = m
+    def initialize_model(self):
 
-    def train_network(self, dataset_handler: inlp_dataset_handler.DatasetHandler) -> float:
+        model = self.model_class(**self.model_params)
+        self.model = model
+
+    def train_train_model(self, dataset_handler: inlp_dataset_handler.ClassificationDatasetHandler) -> float:
+
         """
-
         :param dataset_handler:
         :return:  accuracy score on the dev set / Person's R in the case of regression
         """

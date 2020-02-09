@@ -19,6 +19,9 @@ class DatasetHandler(object):
         self.by_class = by_class
         self.equal_chance_for_main_task_labels = equal_chance_for_main_task_labels
 
+        if by_class:
+            if (Y_train_main is None) or (Y_dev_main is None):
+                raise Exception("Need main-task labels for by-class training.")
 
     def apply_projection(self, P: np.ndarray):
         """

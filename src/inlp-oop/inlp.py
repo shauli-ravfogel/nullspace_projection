@@ -7,8 +7,9 @@ from typing import List
 from tqdm import tqdm
 import random
 import warnings
+import inlp_dataset_handler
+import inlp_linear_model
 
-    
 def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     """
     :param W: the matrix over its nullspace to project
@@ -61,9 +62,7 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
                              is_autoregressive: bool,
-                             min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
-                             Y_dev: np.ndarray, by_class=True, Y_train_main=None,
-                             Y_dev_main=None, dropout_rate = 0) -> np.ndarray:
+                             min_accuracy: float, dataset_handler: inlp_dataset_handler.DatasetHandler, model: inlp_linear_model.., dropout_rate = 0) -> np.ndarray:
     """
     :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
     :param cls_params: a dictionary, containing the params for the sklearn classifier
@@ -71,13 +70,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :param input_dim: size of input vectors
     :param is_autoregressive: whether to train the ith classiifer on the data projected to the nullsapces of w1,...,wi-1
     :param min_accuracy: above this threshold, ignore the learned classifier
-    :param X_train: ndarray, training vectors
-    :param Y_train: ndarray, training labels (protected attributes)
-    :param X_dev: ndarray, eval vectors
-    :param Y_dev: ndarray, eval labels (protected attributes)
-    :param by_class: if true, at each iteration sample one main-task label, and extract the protected attribute only from vectors from this class
-    :param T_train_main: ndarray, main-task train labels
-    :param Y_dev_main: ndarray, main-task eval labels
+
     :param dropout_rate: float, default: 0 (note: not recommended to be used with autoregressive=True)
     :return: P, the debiasing projection; rowspace_projections, the list of all rowspace projection; Ws, the list of all calssifiers.
     """
@@ -85,38 +78,18 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
         warnings.warn("Note: when using dropout with autoregressive training, the property w_i.dot(w_(i+1)) = 0 no longer holds.")
     
     I = np.eye(input_dim)
-    
-    if by_class:
-        if ((Y_train_main is None) or (Y_dev_main is None)):
-            raise Exception("Need main-task labels for by-class training.")
-        main_task_labels = list(set(Y_train_main.tolist()))
-                            
-    X_train_cp = X_train.copy()
-    X_dev_cp = X_dev.copy()
     rowspace_projections = []
     Ws = []
     
     pbar = tqdm(range(num_classifiers))
     for i in pbar:
         
-        clf = classifier.SKlearnClassifier(classifier_class(**cls_params))
-        dropout_scale = 1./(1 - dropout_rate + 1e-6)
-        dropout_mask = (np.random.rand(*X_train.shape) < (1-dropout_rate)).astype(float) * dropout_scale
-        
-        
-        if by_class:
-            cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
-            relevant_idx_train = Y_train_main == cls
-            relevant_idx_dev = Y_dev_main == cls
-        else:
-            relevant_idx_train = np.ones(X_train_cp.shape[0], dtype=bool)
-            relevant_idx_dev = np.ones(X_dev_cp.shape[0], dtype=bool)
-
-        acc = clf.train_network((X_train_cp * dropout_mask)[relevant_idx_train], Y_train[relevant_idx_train], X_dev_cp[relevant_idx_dev], Y_dev[relevant_idx_dev])
+        model.initialize_model()
+        acc = model.train_model(dataset_handler)
         pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
 
-        W = clf.get_weights()
+        W = model.get_weights()
         Ws.append(W)
         P_rowspace_wi = get_rowspace_projection(W) # projection to W's rowspace
         rowspace_projections.append(P_rowspace_wi)
@@ -132,9 +105,7 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
             
             P = get_projection_to_intersection_of_nullspaces(rowspace_projections, input_dim)
             # project  
-                      
-            X_train_cp = (P.dot(X_train.T)).T
-            X_dev_cp = (P.dot(X_dev.T)).T
+            dataset_handler.apply_projection(P)
 
     """
     calculae final projection matrix P=PnPn-1....P2P1
