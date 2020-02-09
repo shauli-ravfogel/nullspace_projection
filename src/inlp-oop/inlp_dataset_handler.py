@@ -36,7 +36,12 @@ class DatasetHandler(object):
         raise NotImplementedError
 
     def get_relevant_idx(self) -> Tuple[np.ndarray]:
-
+        """
+        this function filter only the relevant indices from the training & dev set.
+        if by_class=False, all idx are relevant; othewise, randomly choose the indices corrsponding to a single
+        main-task label, and keep only them for this iteration of INLP.
+        :return: a tuple of numpy arrays, train_relevant_idx and dev_relevant_idx
+        """
         if self.by_class:
             if self.equal_chance_for_main_task_labels:
                 main_task_labels = list(set(self.Y_train_main.tolist()))
@@ -52,15 +57,6 @@ class DatasetHandler(object):
             relevant_idx_dev = np.ones(self.Y_dev.shape[0], dtype=bool)
 
         return relevant_idx_train, relevant_idx_dev
-
-    def get_relevant_idx(self) -> Tuple[np.ndarray]:
-        """
-        this function filter only the relevant indices from the training & dev set.
-        if by_class=False, all idx are relevant; othewise, randomly choose the indices corrsponding to a single
-        main-task label, and keep only them for this iteration of INLP.
-        :return: a tuple of numpy arrays, train_relevant_idx and dev_relevant_idx
-        """
-        raise NotImplementedError
 
     def get_original_training_set(self) -> Tuple[np.ndarray]:
         return copy.deepcopy(self.X_train_original)
@@ -96,9 +92,8 @@ class ClassificationDatasetHandler(DatasetHandler):
 
     def get_current_training_set(self) -> Tuple[np.ndarray]:
 
-        if self.dropout_rate > 0:
-            dropout_scale = 1. / (1 - self.dropout_rate + 1e-6)
-            dropout_mask = (np.random.rand(*self.X_train_current.shape) < (1 - dropout_rate)).astype(float) * dropout_scale
+        dropout_scale = 1. / (1 - self.dropout_rate + 1e-6)
+        dropout_mask = (np.random.rand(*self.X_train_current.shape) < (1 - self.dropout_rate)).astype(float) * dropout_scale
 
         relevant_idx_train , relevant_idx_dev = self.get_relevant_idx()
 
