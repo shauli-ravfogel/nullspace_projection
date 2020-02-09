@@ -11,7 +11,7 @@ class DatasetHandler(object):
         self.X_train_current = copy.deepcopy(X_train)
         self.Y_train = Y_train
         self.X_dev_original = X_dev
-        self.X_dev_original = copy.deepcopy(X_dev)
+        self.X_dev_current = copy.deepcopy(X_dev)
         self.Y_dev = Y_dev
         self.dropout_rate = dropout_rate
         self.Y_train_main = Y_train_main
@@ -22,6 +22,11 @@ class DatasetHandler(object):
         if by_class:
             if (Y_train_main is None) or (Y_dev_main is None):
                 raise Exception("Need main-task labels for by-class training.")
+
+    def reinitialize(self):
+
+        self.X_train_current = copy.deepcopy(self.X_train_original)
+        self.X_dev_current = copy.deepcopy(self.X_dev_original)
 
     def apply_projection(self, P: np.ndarray):
         """
@@ -55,6 +60,13 @@ class DatasetHandler(object):
         main-task label, and keep only them for this iteration of INLP.
         :return: a tuple of numpy arrays, train_relevant_idx and dev_relevant_idx
         """
+
+    def get_original_training_set(self) -> Tuple[np.ndarray]:
+        return copy.deepcopy(self.X_train_original)
+
+    def get_original_dev_set(self) -> Tuple[np.ndarray]:
+        return copy.deepcopy(self.X_dev_original)
+
     def get_current_training_set(self) -> Tuple[np.ndarray]:
 
         raise NotImplementedError
@@ -75,9 +87,11 @@ class ClassificationDatasetHandler(DatasetHandler):
 
     def apply_projection(self, P):
 
-        self.X_train_current = P.dot(self.X_train_original.T).T
-        self.X_dev_current = P.dot(self.X_dev_original.T).T
+        x_train_original = self.get_original_training_set()
+        x_dev_original = self.get_original_dev_set()
 
+        self.X_train_current = P.dot(x_train_original.T).T
+        self.X_dev_current = P.dot(x_dev_original.T).T
 
     def get_current_training_set(self) -> Tuple[np.ndarray]:
 
@@ -105,11 +119,14 @@ class SiameseDatasetHandle(DatasetHandler):
 
     def apply_projection(self, P):
 
-        x_train1, x_train2 = self.X_train_original
+        x_train_original = self.get_original_training_set()
+        x_dev_original = self.get_original_dev_set()
+
+        x_train1, x_train2 = x_train_original
         x_train1_proj = P.dot(x_train1.T).T
         x_train2_proj = P.dot(x_train2.T).T
 
-        x_dev, x_dev2 = self.X_dev_original
+        x_dev, x_dev2 = x_dev_original
         x_dev1_proj = P.dot(x_dev1.T).T
         x_dev2_proj = P.dot(x_dev2.T).T
 
@@ -128,6 +145,7 @@ class SiameseDatasetHandle(DatasetHandler):
         X_train1, X_train2 = self.X_train_current
         x_train_current_dropout_relevant = ((X_train1 * dropout_mask)[relevant_idx_train],
                                             (X_train2 * dropout_mask[relevant_idx_train]))
+
         return x_train_current_dropout_relevant, self.Y_train[relevant_idx_train]
 
     def get_current_dev_set(self) -> Tuple[np.ndarray]:

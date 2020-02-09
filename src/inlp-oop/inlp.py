@@ -84,11 +84,18 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     
     pbar = tqdm(range(num_classifiers))
     for i in pbar:
-        
+
+        # initialize models & dataset
+
         model.initialize_model()
+
+        # train model, record accuracy
+
         acc = model.train_model(dataset_handler)
         pbar.set_description("iteration: {}, accuracy: {}".format(i, acc))
         if acc < min_accuracy: continue
+
+        # collect parameters and rowspace projections
 
         W = model.get_weights()
         Ws.append(W)

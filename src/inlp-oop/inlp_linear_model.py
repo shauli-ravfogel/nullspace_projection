@@ -44,7 +44,7 @@ class SKlearnClassifier(LinearModel):
         model = self.model_class(**self.model_params)
         self.model = model
 
-    def train_train_model(self, dataset_handler: inlp_dataset_handler.ClassificationDatasetHandler) -> float:
+    def train_model(self, dataset_handler: inlp_dataset_handler.ClassificationDatasetHandler) -> float:
 
         """
         :param dataset_handler:
