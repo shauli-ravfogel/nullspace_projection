@@ -101,7 +101,7 @@ class Dataset(torch.utils.data.Dataset):
 
 class SiameseLinearClassifier(LinearModel):
 
-    def __init__(self, model_class: siamese_model.Siamese, model_params):
+    def __init__(self, model_class = siamese_model.Siamese, model_params = {}):
         self.model_class = model_class
         self.model_params = model_params
         self.initialize_model()
@@ -124,11 +124,11 @@ class SiameseLinearClassifier(LinearModel):
         X_dev, Y_dev = dataset_handler.get_current_dev_set()
         X_dev1, X_dev2 = X_dev
 
-        train_dataset = Dataset(X_train1, X_train2, Y_train, device = "cpu")
-        dev_dataset = Dataset(X_dev1, X_dev2, Y_dev, device =" cpu")
+        train_dataset = Dataset(X_train1, X_train2, Y_train, device = "cuda")
+        dev_dataset = Dataset(X_dev1, X_dev2, Y_dev, device ="cuda")
 
-        self.model = self.model_class(train_dataset, dev_dataset, dim = 32, batch_size = 32, device = "cpu")
-        score = self.model.train_network(15)
+        self.model = self.model_class(train_dataset, dev_dataset, dim = 100, batch_size = 32, device = "cuda").cuda()
+        score = self.model.train_network(25)
         return score
 
     def get_weights(self) -> np.ndarray:

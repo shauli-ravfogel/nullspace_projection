@@ -105,7 +105,7 @@ class ClassificationDatasetHandler(DatasetHandler):
         return self.X_dev_current[relevant_idx_dev], self.Y_dev[relevant_idx_dev]
 
 
-class SiameseDatasetHandle(DatasetHandler):
+class SiameseDatasetHandler(DatasetHandler):
 
     def __init__(self, X_train: Tuple[np.ndarray], Y_train: np.ndarray, X_dev: Tuple[np.ndarray], Y_dev: np.ndarray,
                  dropout_rate = 0, Y_train_main = None, Y_dev_main = None, by_class = False, equal_chance_for_main_task_labels = True):
@@ -122,7 +122,7 @@ class SiameseDatasetHandle(DatasetHandler):
         x_train1_proj = P.dot(x_train1.T).T
         x_train2_proj = P.dot(x_train2.T).T
 
-        x_dev, x_dev2 = x_dev_original
+        x_dev1, x_dev2 = x_dev_original
         x_dev1_proj = P.dot(x_dev1.T).T
         x_dev2_proj = P.dot(x_dev2.T).T
 
@@ -132,9 +132,8 @@ class SiameseDatasetHandle(DatasetHandler):
 
     def get_current_training_set(self) -> Tuple[np.ndarray]:
 
-        if self.dropout_rate > 0:
-            dropout_scale = 1. / (1 - self.dropout_rate + 1e-6)
-            dropout_mask = (np.random.rand(*self.X_train_current[0].shape) < (1 - dropout_rate)).astype(float) * dropout_scale
+        dropout_scale = 1. / (1 - self.dropout_rate + 1e-6)
+        dropout_mask = (np.random.rand(*self.X_train_current[0].shape) < (1 - self.dropout_rate)).astype(float) * dropout_scale
 
         relevant_idx_train , relevant_idx_dev = self.get_relevant_idx()
 
@@ -148,7 +147,6 @@ class SiameseDatasetHandle(DatasetHandler):
 
         relevant_idx_train, relevant_idx_dev = self.get_relevant_idx()
         X_dev1, X_dev2 = self.X_dev_current
-        x_dev_current_relevant = ((X_dev1 * dropout_mask)[relevant_idx_dev],
-                                            (X_dev2 * dropout_mask[relevant_idx_dev]))
+        x_dev_current_relevant = (X_dev1[relevant_idx_dev], X_dev2[relevant_idx_dev])
 
         return x_dev_current_relevant, self.Y_dev[relevant_idx_dev]

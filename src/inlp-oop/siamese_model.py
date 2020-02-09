@@ -11,10 +11,10 @@ class Siamese(pl.LightningModule):
 
     def __init__(self, train_dataset: Dataset, dev_dataset: Dataset, dim, batch_size, device="cuda"):
 
-        super(Siamese, self).__init__()
+        super().__init__()
         d = 32
-        self.l1 = torch.nn.Linear(dim, 32, bias=True)
-        self.l2 = torch.nn.Linear(dim, 32, bias=True)
+        self.l1 = torch.nn.Linear(dim, d, bias=True)
+        self.l2 = torch.nn.Linear(dim, d, bias=True)
         self.cosine_sim = torch.nn.CosineSimilarity(dim=1)
         self.w1, self.w2, self.w3, self.b = torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(
             torch.rand(1)), torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(torch.zeros(1))
@@ -34,7 +34,7 @@ class Siamese(pl.LightningModule):
         return h1, h2
 
     def train_network(self, num_epochs):
-        trainer = Trainer(max_nb_epochs=num_epochs, min_nb_epochs=num_epochs, show_progress_bar=False)
+        trainer = Trainer(max_nb_epochs=num_epochs, min_nb_epochs=num_epochs, show_progress_bar=True)
         trainer.fit(self)
 
         return self.acc
@@ -54,7 +54,7 @@ class Siamese(pl.LightningModule):
     def training_step(self, batch, batch_nb):
         # REQUIRED
         x1, x2, y = batch
-        h1, h2 = self.forward(self.dropout(x1), self.dropout(x2))
+        h1, h2 = self.forward(x1, x2)
         dot_prod = self.get_final_representaton_for_sigmoid(h1, h2)
 
         loss_val = self.loss_fn(dot_prod, y)
@@ -79,8 +79,9 @@ class Siamese(pl.LightningModule):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
         avg_acc = torch.stack([x['val_acc'] for x in outputs]).mean()
-        print("Loss is {}".format(avg_loss))
-        print("Accuracy is {}".format(avg_acc))
+        #print("Loss is {}".format(avg_loss))
+        #print("Accuracy is {}".format(avg_acc))
+        self.acc = avg_acc
         return {'avg_val_loss': avg_loss}
 
     def configure_optimizers(self):
