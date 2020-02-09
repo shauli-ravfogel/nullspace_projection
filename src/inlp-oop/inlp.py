@@ -61,8 +61,8 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 
 
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
-                             is_autoregressive: bool,
-                             min_accuracy: float, dataset_handler: inlp_dataset_handler.DatasetHandler, model: inlp_linear_model.., dropout_rate = 0) -> np.ndarray:
+                             is_autoregressive: bool, min_accuracy: float,
+                             dataset_handler: inlp_dataset_handler.DatasetHandler, model: inlp_linear_model.LinearModel, dropout_rate = 0) -> Tuple[np.ndarray]:
     """
     :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
     :param cls_params: a dictionary, containing the params for the sklearn classifier
@@ -70,7 +70,8 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
     :param input_dim: size of input vectors
     :param is_autoregressive: whether to train the ith classiifer on the data projected to the nullsapces of w1,...,wi-1
     :param min_accuracy: above this threshold, ignore the learned classifier
-
+    :param dataset_handler: an isntance of DatasetHandler, in charge of storing the data & projecting it
+    :param inlp_linear_model: an instance of LinearModel, in charge of training the model and returning its weights
     :param dropout_rate: float, default: 0 (note: not recommended to be used with autoregressive=True)
     :return: P, the debiasing projection; rowspace_projections, the list of all rowspace projection; Ws, the list of all calssifiers.
     """
