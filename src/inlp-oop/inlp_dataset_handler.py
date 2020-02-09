@@ -60,6 +60,7 @@ class DatasetHandler(object):
         main-task label, and keep only them for this iteration of INLP.
         :return: a tuple of numpy arrays, train_relevant_idx and dev_relevant_idx
         """
+        raise NotImplementedError
 
     def get_original_training_set(self) -> Tuple[np.ndarray]:
         return copy.deepcopy(self.X_train_original)
