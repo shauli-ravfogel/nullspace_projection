@@ -127,8 +127,8 @@ class SiameseLinearClassifier(LinearModel):
         train_dataset = Dataset(X_train1, X_train2, Y_train, device = "cuda")
         dev_dataset = Dataset(X_dev1, X_dev2, Y_dev, device ="cuda")
 
-        self.model = self.model_class(train_dataset, dev_dataset, dim = 100, batch_size = 32, device = "cuda").cuda()
-        score = self.model.train_network(25)
+        self.model = self.model_class(train_dataset, dev_dataset, input_dim = self.model_params["input_dim"], hidden_dim = self.model_params["hidden_dim"], batch_size = self.model_params["batch_size"], device = "cuda").cuda()
+        score = self.model.train_network(self.model_params["num_iter"])
         return score
 
     def get_weights(self) -> np.ndarray:

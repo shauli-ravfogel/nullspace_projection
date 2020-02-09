@@ -9,12 +9,12 @@ from torch.utils.data import Dataset
 
 class Siamese(pl.LightningModule):
 
-    def __init__(self, train_dataset: Dataset, dev_dataset: Dataset, dim, batch_size, device="cuda"):
+    def __init__(self, train_dataset: Dataset, dev_dataset: Dataset, input_dim, hidden_dim, batch_size, device="cuda"):
 
         super().__init__()
-        d = 32
-        self.l1 = torch.nn.Linear(dim, d, bias=True)
-        self.l2 = torch.nn.Linear(dim, d, bias=True)
+
+        self.l1 = torch.nn.Linear(input_dim, hidden_dim, bias=True)
+        self.l2 = torch.nn.Linear(input_dim, hidden_dim, bias=True)
         self.cosine_sim = torch.nn.CosineSimilarity(dim=1)
         self.w1, self.w2, self.w3, self.b = torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(
             torch.rand(1)), torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(torch.zeros(1))
@@ -44,10 +44,10 @@ class Siamese(pl.LightningModule):
 
     def get_final_representaton_for_sigmoid(self, h1, h2):
         # norm1,norm2 =  torch.norm(h1, dim = 1, keepdim = True),  torch.norm(h2, dim = 1, keepdim = True)
-        # dot_prod = torch.sum(h1 * h2, axis = 1)
+        #dot_prod = torch.sum(h1 * h2, axis = 1)
         dot_prod = self.cosine_sim(h1, h2)
-        # dot_prod = torch.sum((h1-h2)**2, axis = 1)
-        # dot_prod = torch.sum(h1 - h2, axis = 1)
+        #dot_prod = torch.sum((h1-h2)**2, axis = 1)
+        #dot_prod = torch.sum(h1 - h2, axis = 1)
         dot_prod = self.w3 * dot_prod + self.b
         return dot_prod
 
