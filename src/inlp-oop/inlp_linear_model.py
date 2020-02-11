@@ -101,9 +101,17 @@ class Dataset(torch.utils.data.Dataset):
 
 class SiameseLinearClassifier(LinearModel):
 
-    def __init__(self, model_class = siamese_model.Siamese, model_params = {}):
+    def __init__(self, model_class = siamese_model.Siamese, model_params = {}, concat_weights = True):
+        """
+
+        :param model_class: the class of the siamese model (default - pytorch-lightning implementation)
+        :param model_params: a dict, specifying model_class initialization parameters
+        :param concat_weights: bool. If true, concat the siamese weights; otherwise, average them.
+                NOTE: if False, the nullspace projection matrix is not guaranteed to project to the nullspace of l1, l2
+        """
         self.model_class = model_class
         self.model_params = model_params
+        self.concat_weights = concat_weights
         self.initialize_model()
 
     def initialize_model(self):
@@ -124,10 +132,11 @@ class SiameseLinearClassifier(LinearModel):
         X_dev, Y_dev = dataset_handler.get_current_dev_set()
         X_dev1, X_dev2 = X_dev
 
-        train_dataset = Dataset(X_train1, X_train2, Y_train, device = "cuda")
-        dev_dataset = Dataset(X_dev1, X_dev2, Y_dev, device ="cuda")
+        device = self.model_params["device"]
+        train_dataset = Dataset(X_train1, X_train2, Y_train, device = device)
+        dev_dataset = Dataset(X_dev1, X_dev2, Y_dev, device = device)
 
-        self.model = self.model_class(train_dataset, dev_dataset, input_dim = self.model_params["input_dim"], hidden_dim = self.model_params["hidden_dim"], batch_size = self.model_params["batch_size"], device = "cuda").cuda()
+        self.model = self.model_class(train_dataset, dev_dataset, input_dim = self.model_params["input_dim"], hidden_dim = self.model_params["hidden_dim"], batch_size = self.model_params["batch_size"], verbose = self.model_params["verbose"], same_weights = self.model_params["same_weights"], compare_by = self.model_params["compare_by"]).to(device)
         score = self.model.train_network(self.model_params["num_iter"])
         return score
 
@@ -136,10 +145,15 @@ class SiameseLinearClassifier(LinearModel):
         :return: final weights of the model, as np array
         """
 
-        w = self.model.l1.weight.detach().cpu().numpy() + self.model.l2.weight.detach().cpu().numpy()
+        w1, w2 = self.model.l1.weight.detach().cpu().numpy(), self.model.l2.weight.detach().cpu().numpy()
+
+        if self.concat_weights:
+            w = np.concatenate([w1, w2], axis = 0)
+        else:
+            w = (w1 + w2) / 2
+
         if len(w.shape) == 1:
                 w = np.expand_dims(w, 0)
-
         return w
 
 
