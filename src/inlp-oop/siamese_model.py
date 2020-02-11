@@ -74,9 +74,9 @@ class Siamese(pl.LightningModule):
         if self.compare_by == "cosine":
             scores = self.cosine_sim(h1, h2)
         elif self.compare_by == "dot_product":
-            scores = torch.sum(h1 * h2)
+            scores = torch.sum(h1 * h2, axis = 1)
         elif self.compare_by == "l2":
-            scores = torch.sum((h1 - h2) ** 2, axis=1)
+            scores = torch.sum((h1 - h2) ** 2, axis = 1)
         else:
             raise Exception("Unsupported comparison method")
         return scores
