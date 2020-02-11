@@ -108,6 +108,7 @@ class SiameseLinearClassifier(LinearModel):
         :param model_params: a dict, specifying model_class initialization parameters
         :param concat_weights: bool. If true, concat the siamese weights; otherwise, average them.
                 NOTE: if False, the nullspace projection matrix is not guaranteed to project to the nullspace of l1, l2
+                NOTE: this distinction is only meaningful when the siamese network uses different weight matrices for the two inputs.
         """
         self.model_class = model_class
         self.model_params = model_params
