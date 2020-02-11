@@ -35,8 +35,7 @@ class Siamese(pl.LightningModule):
         self.verbose = verbose
         self.compare_by = compare_by
         self.cosine_sim = torch.nn.CosineSimilarity(dim=1)
-        self.w1, self.w2, self.w3, self.b = torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(
-            torch.rand(1)), torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(torch.zeros(1))
+        self.w_out, self.b_out = torch.nn.Parameter(torch.rand(1)), torch.nn.Parameter(torch.zeros(1))
 
         self.train_data = train_dataset
         self.dev_data = dev_dataset
@@ -79,6 +78,8 @@ class Siamese(pl.LightningModule):
             scores = torch.sum((h1 - h2) ** 2, axis = 1)
         else:
             raise Exception("Unsupported comparison method")
+
+        scores = self.w_out * scores + self.b_out
         return scores
 
     def training_step(self, batch, batch_nb):
