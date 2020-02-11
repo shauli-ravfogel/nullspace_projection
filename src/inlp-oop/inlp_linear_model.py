@@ -115,6 +115,10 @@ class SiameseLinearClassifier(LinearModel):
         self.initialize_model()
 
     def initialize_model(self):
+        """
+        not in use (model initialziation needs a dataset in torch-lightning)
+        :return:
+        """
         return
 
         model = self.model_class(**self.model_params)

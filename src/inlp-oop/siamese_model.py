@@ -20,7 +20,7 @@ class Siamese(pl.LightningModule):
         :param batch_size:
         :param verbose: bool. If true, print training progress
         :param same_weights: bool. If true, the model uses the same weight matrix for both inputs
-        :param compare_by: str, the way to derive the sigmoid score form the two representations.
+        :param compare_by: str, the way to derive the sigmoid score from the two representations.
                 options: 'cosine' (cosine distance); "l2" (euclidean distance); 'dot_product'
         """
         super().__init__()
@@ -48,19 +48,13 @@ class Siamese(pl.LightningModule):
     def forward(self, x1, x2):
 
         h1 = self.l1(x1)
-        if self.same_weights:
-            h2 = self.l1(x2)
-        else:
-            h2 = self.l2(x2)
+        h2 = self.l1(x2)
         return h1, h2
 
     def train_network(self, num_epochs):
         trainer = Trainer(max_nb_epochs=num_epochs, min_nb_epochs=num_epochs, show_progress_bar=self.verbose)
         trainer.fit(self)
         return self.acc
-
-    def get_weights(self):
-        return self.l.weight.data.detach().cpu().numpy()
 
     def get_final_representaton_for_sigmoid(self, h1, h2):
 
