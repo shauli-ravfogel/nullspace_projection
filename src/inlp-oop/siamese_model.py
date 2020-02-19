@@ -29,7 +29,7 @@ class Siamese(pl.LightningModule):
         if not same_weights:
                 self.l2 = torch.nn.Linear(input_dim, hidden_dim, bias=True).double()
         else:
-                self.l2 = self.l1
+                self.l2 = self.l1.double()
 
         self.same_weights = same_weights
         self.verbose = verbose
@@ -48,7 +48,7 @@ class Siamese(pl.LightningModule):
     def forward(self, x1, x2):
 
         h1 = self.l1(x1)
-        h2 = self.l1(x2)
+        h2 = self.l2(x2)
         return h1, h2
 
     def train_network(self, num_epochs):

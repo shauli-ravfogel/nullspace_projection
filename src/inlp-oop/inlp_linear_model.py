@@ -95,7 +95,7 @@ class Dataset(torch.utils.data.Dataset):
             vec1 = vec1.to(self.device)
             vec2 = vec2.to(self.device)
 
-            return vec1, vec2, torch.tensor(y).float().to(self.device)
+            return vec1, vec2, torch.tensor(y).to(self.device)
 
 
 
