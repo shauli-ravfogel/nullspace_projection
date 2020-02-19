@@ -91,11 +91,11 @@ class Dataset(torch.utils.data.Dataset):
         with torch.no_grad():
             v1, v2, y = self.x1[index], self.x2[index], self.y[index]
 
-            vec1, vec2 = torch.from_numpy(v1).float(), torch.from_numpy(v2).float()
+            vec1, vec2 = torch.from_numpy(v1).double(), torch.from_numpy(v2).double()
             vec1 = vec1.to(self.device)
             vec2 = vec2.to(self.device)
 
-            return vec1, vec2, torch.tensor(y).float().to(self.device)
+            return vec1, vec2, torch.tensor(y).to(self.device)
 
 
 
