@@ -25,11 +25,11 @@ class Siamese(pl.LightningModule):
         """
         super().__init__()
 
-        self.l1 = torch.nn.Linear(input_dim, hidden_dim, bias=True)
+        self.l1 = torch.nn.Linear(input_dim, hidden_dim, bias=True).double()
         if not same_weights:
-                self.l2 = torch.nn.Linear(input_dim, hidden_dim, bias=True)
+                self.l2 = torch.nn.Linear(input_dim, hidden_dim, bias=True).double()
         else:
-                self.l2 = self.l1
+                self.l2 = self.l1.double()
 
         self.same_weights = same_weights
         self.verbose = verbose
