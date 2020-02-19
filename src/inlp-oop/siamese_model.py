@@ -48,7 +48,7 @@ class Siamese(pl.LightningModule):
     def forward(self, x1, x2):
 
         h1 = self.l1(x1)
-        h2 = self.l1(x2)
+        h2 = self.l2(x2)
         return h1, h2
 
     def train_network(self, num_epochs):
