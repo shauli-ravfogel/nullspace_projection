@@ -6,7 +6,8 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-
+#from triplet_loss import BatchHardTripletLoss
+import triplet_loss
 
 class Siamese(pl.LightningModule):
 
@@ -110,6 +111,83 @@ class Siamese(pl.LightningModule):
         # REQUIRED
         # return torch.optim.SGD(self.parameters(), lr=0.005, momentum=0.9)
         return torch.optim.Adam(self.parameters(), weight_decay=1e-4)
+
+    @pl.data_loader
+    def train_dataloader(self):
+        return self.train_gen
+
+    @pl.data_loader
+    def val_dataloader(self):
+        # OPTIONAL
+        # can also return a list of val dataloaders
+        return self.dev_gen
+        
+        
+        
+        
+class SiameseMetric(pl.LightningModule):
+    
+    
+    
+    def __init__(self, train_dataset: Dataset, dev_dataset: Dataset, input_dim, hidden_dim, batch_size,
+                 verbose=True, k=1, p=2, alpha=0.1, mode = "euc", final = "softmax", device = "cpu"):
+
+        super(SiameseMetric, self).__init__()
+        self.l = torch.nn.Linear(input_dim, hidden_dim).double()
+        
+        self.train_gen = torch.utils.data.DataLoader(train_dataset, batch_size = batch_size, drop_last = False, shuffle=True)
+        self.dev_gen = torch.utils.data.DataLoader(dev_dataset, batch_size = batch_size, drop_last = False, shuffle=True)
+        self.loss_fn = triplet_loss.BatchHardTripletLoss(final = final, k = k, p = p, alpha = alpha, mode = mode, device = device)
+        self.acc = None
+        self.verbose = verbose
+        self.optimizer = torch.optim.Adam(self.parameters(), weight_decay = 1e-6)
+        
+    def forward(self, x1, x2):
+
+          h1 = self.l(x1)
+          h2 = self.l(x2)
+         
+          return h1, h2
+ 
+    def train_network(self, num_epochs):
+    
+      trainer = Trainer(max_nb_epochs = num_epochs, min_nb_epochs = num_epochs, show_progress_bar = True)
+      trainer.fit(self)
+
+      return self.acc   
+      
+    def get_weights(self):
+    
+        return self.l.weight.data.detach().cpu().numpy()
+    
+    def training_step(self, batch, batch_nb):
+        # REQUIRED
+        x1, x2, str1, str2, id1, id2 = batch
+        h1, h2 = self.forward(x1, x2)
+        loss_val =  self.loss_fn(h1, h2, str1, str2, id1, index=0, evaluation = False)
+        
+        return {'loss': loss_val[0]}
+        
+
+    def validation_step(self, batch, batch_nb):
+    
+        # OPTIONAL
+        x1, x2, str1, str2, id1, id2 = batch
+        h1, h2 = self.forward(x1, x2)
+        loss_val =  self.loss_fn(h1, h2, str1, str2, id1, index=batch_nb, evaluation = True)
+        return {'val_loss': loss_val[0]}
+
+    def validation_end(self, outputs):
+        # OPTIONAL    
+        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
+        if self.verbose:
+            print("Loss is {}".format(avg_loss))
+        self.acc = avg_loss
+        return {'avg_val_loss': avg_loss}
+
+    def configure_optimizers(self):
+        # REQUIRED
+        return torch.optim.Adam(self.parameters(), weight_decay = 1e-4)
 
     @pl.data_loader
     def train_dataloader(self):
