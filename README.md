@@ -42,7 +42,7 @@ Assumes the bias-in-bios dataset from [De-Arteaga, Maria, et al. 2019](https://a
 ```py
 python src/data/create_dataset_biasbios.py \
         --input-path data/biasbios/BIOS.pkl \
-        --output_dir data/biasbios/ \
+        --output-dir data/biasbios/ \
         --vocab-size 250000
 ```
 
