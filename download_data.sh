@@ -8,8 +8,8 @@ mkdir -p data/embeddings
 
 wget https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip -P data/embeddings/
 wget http://nlp.stanford.edu/data/glove.42B.300d.zip -P data/embeddings/
-unzip data/embeddings/crawl-300d-2M.vec.zip -d data/embeddings/crawl-300d-2M.vec
-unzip data/embeddings/glove.42B.300d.zip -d data/embeddings/glove.42B.300d.txt
+unzip data/embeddings/crawl-300d-2M.vec.zip -d data/embeddings/                 
+unzip data/embeddings/glove.42B.300d.zip -d data/embeddings/ 
 
 mkdir -p data/biasbios
 wget https://storage.googleapis.com/ai2i/nullspace/biasbios/train.pickle -P data/biasbios/
