@@ -53,7 +53,6 @@ def write_to_file(dictionary, name):
 
 def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
         """
-
         :param data: list of dictionaries, each containing the biography of a single person
         :param vocab_size: how many words to keep
         :return: none. writes the dataset to files
@@ -82,9 +81,28 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
 
         random.seed(0)
         np.random.seed(0)
-        train_dev, test = sklearn.model_selection.train_test_split(all_data, test_size=0.25, random_state=0)
-        train, dev = sklearn.model_selection.train_test_split(train_dev, test_size=0.1/0.75, random_state=0)
-        print("Train size: {}; Dev size: {}; Test size: {}".format(len(train), len(dev), len(test)))
+
+        train_prop, dev_prop, test_prop = 0.65, 0.1, 0.25      
+        train, dev, test = [], [], []
+                
+        for prof in all_profs:
+            
+                relevant_prof = [d for d in all_data if d["p"] == prof]
+                relevant_prof_m, relevant_prof_f = [d for d in relevant_prof if d["g"] == "m"],  [d for d in relevant_prof if d["g"] == "f"]
+                prof_m_train_dev, prof_m_test = sklearn.model_selection.train_test_split(relevant_prof_m, test_size=0.25, random_state=0)
+                prof_m_train, prof_m_dev = sklearn.model_selection.train_test_split(prof_m_train_dev, test_size=0.1/0.75, random_state=0)
+
+                prof_f_train_dev, prof_f_test = sklearn.model_selection.train_test_split(relevant_prof_f, test_size=0.25, random_state=0)
+                prof_f_train, prof_f_dev = sklearn.model_selection.train_test_split(prof_f_train_dev, test_size=0.1/0.75, random_state=0)
+                
+                train.extend(prof_m_train + prof_f_train)
+                dev.extend(prof_m_dev + prof_f_dev)
+                test.extend(prof_m_test + prof_f_test)
+                
+        random.shuffle(train)
+        random.shuffle(dev)
+        random.shuffle(test)
+        
         pickle_data(train, output_dir + "train")
         pickle_data(dev, output_dir + "dev")
         pickle_data(test, output_dir + "test")
