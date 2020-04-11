@@ -105,7 +105,8 @@ def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers
         
         
         if by_class:
-            cls = np.random.choice(Y_train_main)  # random.choice(main_task_labels) UNCOMMENT FOR EQUAL CHANCE FOR ALL Y
+            #cls = np.random.choice(Y_train_main)  # uncomment for frequency-based sampling
+            cls = random.choice(main_task_labels)
             relevant_idx_train = Y_train_main == cls
             relevant_idx_dev = Y_dev_main == cls
         else:
