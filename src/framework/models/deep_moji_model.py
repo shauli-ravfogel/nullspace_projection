@@ -11,18 +11,16 @@ from overrides import overrides
 @Model.register("model_deep_moji")
 class DeepMojiModel(Model):
     """
-    This ``Model`` make a classification of the FH problem.
-    Given a sentence and an anchor (number) it create contextualized
-    representation for every token and combined with the anchor it
-    assign a score, as well to the 6 implicit classes.
-    Both the scores for the implicit classes and the tokens are concatenated
-    and the highest score is the models' prediction.
-
+    simple MLP model, that operates over encoded states
 
     Parameters
     ----------
     vocab : ``Vocabulary``, required
         A Vocabulary, required in order to compute sizes for input/output projections.
+    emb_size: ``int``, required
+        the size of the input embedding
+    hidden_size: ``int``, required
+        the size of the hidden layer
     """
 
     def __init__(self,
@@ -33,6 +31,7 @@ class DeepMojiModel(Model):
         super().__init__(vocab)
         self.emb_size = emb_size
 
+        # an mlp with one hidden layer
         layers = []
         layers.append(nn.Linear(self.emb_size, hidden_size))
         layers.append(nn.Tanh())

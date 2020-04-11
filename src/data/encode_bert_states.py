@@ -8,6 +8,8 @@ Options:
   --output_dir=OUTPUT_DIR       write down output file
   --split=SPLIT                 split name
 
+Encoding text with Bert with two methods: average of all words,
+ and the cls token as sentence representation.
 """
 
 import numpy as np
@@ -19,12 +21,21 @@ from tqdm import tqdm
 
 
 def read_data_file(input_file):
+    """
+    read the data file with a pickle format
+    :param input_file: input path, string
+    :return: the file's content
+    """
     with open(input_file, 'rb') as f:
         data = pickle.load(f)
     return data
 
 
 def load_lm():
+    """
+    load bert's language model
+    :return: the model and its corresponding tokenizer
+    """
     model_class, tokenizer_class, pretrained_weights = (BertModel, BertTokenizer, 'bert-base-uncased')
     tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
     model = model_class.from_pretrained(pretrained_weights)
@@ -32,6 +43,12 @@ def load_lm():
 
 
 def tokenize(tokenizer, data):
+    """
+    Iterate over the data and tokenize it. Sequences longer than 512 tokens are trimmed.
+    :param tokenizer: tokenizer to use for tokenization
+    :param data: data to tokenize
+    :return: a list of the entire tokenized data
+    """
     tokenized_data = []
     for row in tqdm(data):
         tokens = tokenizer.encode(row['hard_text_untokenized'], add_special_tokens=True)
@@ -41,6 +58,14 @@ def tokenize(tokenizer, data):
 
 
 def encode_text(model, data):
+    """
+    encode the text
+    :param model: encoding model
+    :param data: data
+    :return: two numpy matrices of the data:
+                first: average of all tokens in each sentence
+                second: cls token of each sentence
+    """
     all_data_cls = []
     all_data_avg = []
     batch = []
@@ -64,14 +89,9 @@ if __name__ == '__main__':
     split = arguments['--split']
 
     model, tokenizer = load_lm()
-    # Encode text
-    input_ids = torch.tensor([tokenizer.encode("Here is some text to encode",
-                                               add_special_tokens=True)])
 
     data = read_data_file(in_file)
     tokens = tokenize(tokenizer, data)
-    with torch.no_grad():
-        last_hidden_states = model(input_ids)[0]  # Models outputs are now tuples
 
     avg_data, cls_data = encode_text(model, tokens)
 

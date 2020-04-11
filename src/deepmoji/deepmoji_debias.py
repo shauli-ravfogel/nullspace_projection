@@ -1,6 +1,6 @@
 """
 Usage:
-  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--in_dim=IN_DIM] [--n=N]
+  deepmoji_debias.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--in_dim=IN_DIM] [--n=N]
 
 Options:
   -h --help                     show this help message and exit
@@ -14,7 +14,6 @@ Script for learning a debiasing matrix P from some vectors data
 
 import numpy as np
 from docopt import docopt
-from sklearn.svm import LinearSVC
 from sklearn.linear_model import SGDClassifier
 from sklearn.utils import shuffle
 
@@ -52,10 +51,7 @@ def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected,
 
     print("num classifiers: {}".format(n))
 
-    # clf = LinearSVC
     clf = SGDClassifier
-    # params = {'max_iter': 2000, 'fit_intercept': True, 'class_weight': "balanced", 'dual': False}
-    # params = {'max_iter': 2000, 'fit_intercept': True, 'penalty': "l2", 'n_jobs': 32}
     params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 1200, 'random_state': 0, 'tol': 1e-3}
 
     P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
@@ -70,8 +66,8 @@ if __name__ == '__main__':
 
     in_dir = arguments['--input_dir']
     out_dir = arguments['--output_dir']
-    in_dim = arguments['--in_dim']
-    n = arguments['--n']
+    in_dim = int(arguments['--in_dim'])
+    n = int(arguments['--n'])
 
     x_train, y_train_protected, y_train_main = load_data(in_dir + '/train/')
     x_dev, y_dev_protected, y_dev_main = load_data(in_dir + '/dev/')

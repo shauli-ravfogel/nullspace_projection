@@ -1,6 +1,6 @@
 """
 Usage:
-  main.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--model=MODEL]
+  last_layer_extraction.py [--input_dir=INPUT_DIR] [--output_dir=OUTPUT_DIR] [--model=MODEL]
 
 Options:
   -h --help                     show this help message and exit
@@ -8,16 +8,14 @@ Options:
   --output_dir=OUTPUT_DIR       write down output file
   --model=MODEL                 the allennlp model file
 
-Script for collecting potential verbs from the aspecutal verbs list.
+Collecting the last hidden layer states of an MLP model (the layer which will be used for debiasing)
 """
 
 from docopt import docopt
 
 from allennlp.models.archival import load_archive
 from allennlp.predictors import Predictor
-from allennlp.models.ensemble import Ensemble
 
-from tqdm import tqdm
 import numpy as np
 
 import torch
