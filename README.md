@@ -7,6 +7,12 @@ conda create -n null_space python=3.7 anaconda
 conda activate null_space
 ```
 
+## Setup
+download the data used for this project:
+```sh
+./download_data.sh
+```
+
 
 ## Word Embedding experiments (Section 6.1 in the paper)
 
@@ -46,7 +52,7 @@ python src/data/create_dataset_biasbios.py \
         --vocab-size 250000
 ```
 
-        
+
 ```sh
 ./run_bias_bios.sh
 ```
