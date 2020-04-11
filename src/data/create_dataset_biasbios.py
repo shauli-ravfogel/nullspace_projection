@@ -7,6 +7,7 @@ import random
 import numpy as np
 from typing import List, Dict
 import argparse
+import spacy
 
 PROFS = ['professor', 'physician', 'attorney', 'photographer', 'journalist', 'nurse', 'psychologist', 'teacher',
 'dentist', 'surgeon', 'architect', 'painter', 'model', 'poet', 'filmmaker', 'software_engineer',
@@ -29,12 +30,20 @@ def load_data(fname):
 
 def preprocess(data: List[dict]):
 
-        # unite similar professions
+        # unite similar professions, tokenize
         """
         :param data: List[dictionary]
         :return: none
         changes the data dictionaries in place, uniting similar professions.
         """
+        nlp = spacy.load("en_core_web_sm")
+        texts = [d["raw"] for d in data]        
+        docs =  nlp.pipe(tqdm.tqdm(texts, total = len(texts)), disable=["tagger", "parser", "ner"], n_process = 8)
+        
+        for i,(d,doc) in enumerate(zip(data, docs)):
+            
+            data[i]["raw_tokenized"] = " ".join([tok.text for tok in doc])
+    
         for i, data_dict in enumerate(data):
                 prof = data_dict["raw_title"].lower()
                 data[i]["raw_title"] = PROF2UNIFIED_PROF[prof] if prof in PROF2UNIFIED_PROF else prof
@@ -74,10 +83,11 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
         all_data = []
         for entry in tqdm.tqdm(data, total=len(data)):
                 gender, prof = entry["gender"].lower(), entry["raw_title"].lower()
-                raw, start_index = entry["raw"], entry["start_pos"]
+                raw, raw_tokenized, start_index = entry["raw"], entry["raw_tokenized"], entry["start_pos"]
+                hard_text_tokenized = raw_tokenized[start_index + 1:]
                 hard_text = raw[start_index + 1:] # the biography without the first line
                 text_without_gender = entry["bio"] # the text, with all gendered words and names removed
-                all_data.append({"g": gender, "p": prof, "text": raw, "start": start_index, "hard_text": hard_text, "text_without_gender": text_without_gender})
+                all_data.append({"g": gender, "p": prof, "text": raw, "start": start_index, "hard_text": hard_text, "text_without_gender": text_without_gender, "hard_text_tokenized": hard_text_tokenized})
 
         random.seed(0)
         np.random.seed(0)
