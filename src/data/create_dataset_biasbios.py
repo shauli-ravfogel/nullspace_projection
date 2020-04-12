@@ -1,3 +1,4 @@
+
 import pickle
 import sklearn
 from sklearn import model_selection
@@ -49,7 +50,7 @@ def write_to_file(dictionary, name):
 
         with open(name+".txt", "w", encoding = "utf-8") as f:
 
-                for k,v in dictionary.items():
+                for k,v in sorted(dictionary.items()):
 
                         f.write(str(k) + "\t" + str(v) + "\n")
 
@@ -60,7 +61,7 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
         :return: none. writes the dataset to files
         """
         g2i, i2g = {"m": 0, "f": 1}, {1: "f", 0: "m"}
-        all_profs = list(set([d["raw_title"] for d in data]))
+        all_profs = list(sorted(set([d["raw_title"] for d in data])))
         all_words = []
 
         for d in data:
@@ -71,7 +72,7 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
         common_words = ["<UNK>"] + common_words
 
         p2i = {p: i for i, p in enumerate(sorted(all_profs))}
-        w2i = {w: i for i, w in enumerate(common_words)}
+        w2i = {w: i for i, w in enumerate(sorted(common_words))}
 
         all_data = []
         nlp = spacy.load("en_core_web_sm") 
@@ -81,7 +82,9 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
                 raw, start_index = entry["raw"], entry["start_pos"]
                 hard_text = raw[start_index + 1:] # the biography without the first line
                 hard_text_tokenized =  list(nlp.pipe([hard_text], disable=["tagger", "parser", "ner"]))[0]
+
                 hard_text_tokenized = " ".join([tok.text for tok in hard_text_tokenized])
+
                 text_without_gender = entry["bio"] # the text, with all gendered words and names removed
                 all_data.append({"g": gender, "p": prof, "text": raw, "start": start_index, "hard_text": hard_text, "text_without_gender": text_without_gender, "hard_text_tokenized": hard_text_tokenized})
 
@@ -92,19 +95,21 @@ def split_train_dev_test(data: List[dict], output_dir: str, vocab_size: int):
         train, dev, test = [], [], []
                 
         for prof in all_profs:
-            
                 relevant_prof = [d for d in all_data if d["p"] == prof]
                 relevant_prof_m, relevant_prof_f = [d for d in relevant_prof if d["g"] == "m"],  [d for d in relevant_prof if d["g"] == "f"]
-                prof_m_train_dev, prof_m_test = sklearn.model_selection.train_test_split(relevant_prof_m, test_size=0.25, random_state=0)
-                prof_m_train, prof_m_dev = sklearn.model_selection.train_test_split(prof_m_train_dev, test_size=0.1/0.75, random_state=0)
+                prof_m_train_dev, prof_m_test = sklearn.model_selection.train_test_split(relevant_prof_m, test_size=0.25, random_state = 0)
+                prof_m_train, prof_m_dev = sklearn.model_selection.train_test_split(prof_m_train_dev, test_size=0.1/0.75, random_state = 0)
 
                 prof_f_train_dev, prof_f_test = sklearn.model_selection.train_test_split(relevant_prof_f, test_size=0.25, random_state=0)
                 prof_f_train, prof_f_dev = sklearn.model_selection.train_test_split(prof_f_train_dev, test_size=0.1/0.75, random_state=0)
-                
+                                
                 train.extend(prof_m_train + prof_f_train)
                 dev.extend(prof_m_dev + prof_f_dev)
                 test.extend(prof_m_test + prof_f_test)
-                
+
+        np.random.seed(0)
+        random.seed(0)
+
         random.shuffle(train)
         random.shuffle(dev)
         random.shuffle(test)
