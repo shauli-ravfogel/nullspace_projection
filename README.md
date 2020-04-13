@@ -29,11 +29,6 @@ python src/data/filter_vecs.py \
 
 ## Controlled Demographic experiments (Section 6.2 in the paper)
 
-```py
-python src/data/deepmoji_split.py \
-        --input_dir data/deepmoji/ \
-        --output_dir data/deepmoji/
-```
 
 ```sh 
 ./run_deepmoji_debiasing.sh
