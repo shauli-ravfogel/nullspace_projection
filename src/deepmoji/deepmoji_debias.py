@@ -55,7 +55,7 @@ def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected,
     params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 1200, 'random_state': 0, 'tol': 1e-3}
 
     P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
-                                          X_train, Y_train_protected, X_dev, Y_dev_protected, noise=noise,
+                                          X_train, Y_train_protected, X_dev, Y_dev_protected,
                                           by_class=True, Y_train_main=Y_train_main, Y_dev_main=Y_dev_main)
     fname = out_dir + "/P.num-clfs={}.npy".format(n)
     np.save(fname, P_n)
