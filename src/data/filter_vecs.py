@@ -1,3 +1,4 @@
+
 import argparse
 import gensim
 from gensim.models.word2vec import Word2Vec
@@ -8,15 +9,14 @@ import string
 import codecs
 import json
 import sys
-from typing import List
+from typing import List, Tuple
 
 def get_excluded_words():
     """
     :return: excluded words, a list of words we possibly want to remove.
              the list of excluded words is based on Gonen et at. 2019 and contains gender specific words.
-
     """
-    with codecs.open('../lists/gender_specific_full.json') as f:
+    with codecs.open('data/lists/gender_specific_full.json') as f:
         gender_specific = json.load(f)
 
     exclude_words = list(set(gender_specific))
@@ -26,7 +26,7 @@ def get_names():
         """
         A list of gender-specific first names.
         """
-        with open("../lists/first_names_clean.txt", "r") as f:
+        with open("data/lists/first_names_clean.txt", "r") as f:
                 lines = f.readlines()
         
         names = [l.strip().lower() for l in lines]
@@ -58,7 +58,6 @@ def has_punct(w: str):
 
 def has_digit(w):
     """
-
     :param w: a word
     :return: True if contains digit, False otherwise
     """
@@ -84,7 +83,6 @@ def save_in_word2vec_format(vecs: np.ndarray, words: np.ndarray, fname: str):
 
 def filter_vecs(vecs: np.ndarray, words: np.ndarray, keep_gendered: bool, keep_names: bool):
     """
-
     :param vecs: the complete set of pretrained vectors
     :param words: the corresponding words
     :param keep_gendered: whether or not to keep inherently gendered words
@@ -134,7 +132,6 @@ def filter_vecs(vecs: np.ndarray, words: np.ndarray, keep_gendered: bool, keep_n
 
 def save_voc(voc: List[str], path: str):
         """
-
         :param voc: list of words in the vocab
         :param path: path to save
         :return:
@@ -151,22 +148,22 @@ def main():
     parser = argparse.ArgumentParser(description='Filtering pretrained word embeddings for word2vec debiasing experiments.',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--input-path', dest='input_path', type=str,
-                        default='../../data/embeddings/glove.42B.300d.txt',
+                        default='data/embeddings/glove.42B.300d.txt',
                         help='path to embeddings; NOTE: ASSUMES LOWERCASE!')
     parser.add_argument('--output-dir', dest='output_dir', type=str,
-                        default="../../data/embeddings/",
+                        default="data/embeddings/",
                         help='output directory.')
     parser.add_argument('--top-k', dest='top_k', type=int,
                         default= 150000,
                         help='how many word vectors to keep.')  
-    parser.add_argument('--keep-inherently-gendered', dest='keep_gendered', type=bool,
-                        default=True,
+    parser.add_argument('--keep-inherently-gendered', dest='keep_gendered', 
+                        action = 'store_true',
                         help='if true, keeps inherently gendered words such as father, mother, queen, king.')
-    parser.add_argument('--keep-names', dest='keep_names', type=bool,
-                        default=True,
+    parser.add_argument('--keep-names', dest='keep_names',
+                        action = 'store_true',
                         help='if true, keeps private names')                           
     args = parser.parse_args()
-                                                  
+                                                 
     model, vecs, words = load_model(args.input_path, binary = False)
     (vecs, words), (words_gendered, vecs_gendered) = filter_vecs(vecs, words, args.keep_gendered, args.keep_names)
     save_in_word2vec_format(vecs[:args.top_k], words[:args.top_k], args.output_dir + "vecs.filtered.txt")

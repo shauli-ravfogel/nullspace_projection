@@ -19,21 +19,17 @@ download the data used for this project:
 Assumes uncased Common Crawl GloVe vectors saved at `data/embeddings`.
 
 ```py
+
 python src/data/filter_vecs.py \
-        --input-path data/embeddings/glove.42B.300d.txt \
-        --output_dir data/embeddings/ \
-        --top-k 150000 \
-        --keep-inherently-gendered \
-        --keep-names
+--input-path data/embeddings/glove.42B.300d.txt \
+--output-dir data/embeddings/ \
+-top-k 150000  \
+--keep-inherently-gendered  \
+--keep-names 
 ```
 
 ## Controlled Demographic experiments (Section 6.2 in the paper)
 
-```py
-python src/data/deepmoji_split.py \
-        --input_dir data/deepmoji/ \
-        --output_dir data/deepmoji/
-```
 
 export PYTHONPATH=/path_to/nullspace_projection
 ```sh 

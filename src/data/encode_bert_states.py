@@ -51,7 +51,7 @@ def tokenize(tokenizer, data):
     """
     tokenized_data = []
     for row in tqdm(data):
-        tokens = tokenizer.encode(row['hard_text_untokenized'], add_special_tokens=True)
+        tokens = tokenizer.encode(row['hard_text'], add_special_tokens=True)
         # keeping a maximum length of bert tokens: 512
         tokenized_data.append(tokens[:512])
     return tokenized_data

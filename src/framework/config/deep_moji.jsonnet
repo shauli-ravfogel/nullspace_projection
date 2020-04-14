@@ -1,4 +1,4 @@
-local data_path = "../data/emoji_sent_race/";
+local data_path = "../data/deepmoji/";
 {
   "dataset_reader": {
     "type": "deep_moji_reader",

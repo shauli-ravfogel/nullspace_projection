@@ -17,6 +17,7 @@ from allennlp.models.archival import load_archive
 from allennlp.predictors import Predictor
 
 import numpy as np
+import os
 
 import torch
 
@@ -44,6 +45,7 @@ def calculate_vectors(in_dir, out_dir):
         for vectors in ['pos_pos', 'pos_neg', 'neg_pos', 'neg_neg']:
             data = read_data_file(in_dir + '/' + split + '/' + vectors + '.npy')
             transformed_vec = transform_vec(data, archive_model)
+            os.makedirs(out_dir + '/' + split, exist_ok=True)
             np.save(out_dir + '/' + split + '/' + vectors + '.npy', transformed_vec)
 
 
