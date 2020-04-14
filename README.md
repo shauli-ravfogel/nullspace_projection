@@ -35,6 +35,7 @@ python src/data/deepmoji_split.py \
         --output_dir data/deepmoji/
 ```
 
+export PYTHONPATH=/path_to/nullspace_projection
 ```sh 
 ./run_deepmoji_debiasing.sh
 ```
