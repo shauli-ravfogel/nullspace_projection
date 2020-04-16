@@ -21,3 +21,11 @@ wget https://storage.googleapis.com/ai2i/nullspace/deepmoji/pos_pos.npy -P data/
 wget https://storage.googleapis.com/ai2i/nullspace/deepmoji/pos_neg.npy -P data/deepmoji
 wget https://storage.googleapis.com/ai2i/nullspace/deepmoji/neg_pos.npy -P data/deepmoji
 wget https://storage.googleapis.com/ai2i/nullspace/deepmoji/neg_neg.npy -P data/deepmoji
+
+mkdir -p data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/train_avg.npy -P data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/train_cls.npy -P data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/dev_avg.npy -P data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/dev_cls.npy -P data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/test_avg.npy -P data/bert_encode_biasbios
+wget https://storage.googleapis.com/ai2i/nullspace/bert_encode_biasbios/test_cls.npy -P data/bert_encode_biasbios
