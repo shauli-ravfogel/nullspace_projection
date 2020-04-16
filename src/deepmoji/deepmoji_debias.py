@@ -16,6 +16,7 @@ import numpy as np
 from docopt import docopt
 from sklearn.linear_model import SGDClassifier
 from sklearn.utils import shuffle
+from sklearn.svm import LinearSVC
 
 from src import debias
 
@@ -46,18 +47,20 @@ def load_data(path):
 def find_projection_matrices(X_train, Y_train_protected, X_dev, Y_dev_protected, Y_train_main, Y_dev_main,
                              dim, out_dir, n):
     is_autoregressive = True
-    min_acc = 0.
+    min_acc = 0.51
     noise = False
 
     print("num classifiers: {}".format(n))
 
-    clf = SGDClassifier
-    params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 1200, 'random_state': 0, 'tol': 1e-3}
+    #clf = SGDClassifier
+    #params = {'warm_start': True, 'loss': 'log', 'n_jobs': -1, 'max_iter': 1200, 'random_state': 0, 'tol': 1e-3}
+    clf = LinearSVC
+    params = {'fit_intercept': True, 'class_weight': 'balanced', 'dual': False, 'C': 0.1}
 
     P_n = debias.get_debiasing_projection(clf, params, n, dim, is_autoregressive, min_acc,
                                           X_train, Y_train_protected, X_dev, Y_dev_protected,
                                           by_class=True, Y_train_main=Y_train_main, Y_dev_main=Y_dev_main)
-    fname = out_dir + "/P.num-clfs={}.npy".format(n)
+    fname = out_dir + "/P_svm.num-clfs={}.npy".format(n)
     np.save(fname, P_n)
 
 
