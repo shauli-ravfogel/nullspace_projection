@@ -6,7 +6,7 @@ This repository contains the code for the experiments and algorithm from the pap
 
 The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp-oop`. Given a dataset of examples `X` and annotation for any kind of information `Z` we want to remove from `X` (e.g. gender, sentiment, tense) the algorithm learns a proejction matrix `P` which aims to exhaustively remove the ability to linearly predict `Z` from `X` ("linear guardness"). 
 
-`src/inlp-oop` contains an implementations of the algorithm that allows learning a projection matrix for several common objectives, such as neutralizing the information captured by linear classifiers (a classification objective), or by linear siamese networks (a metric learning objective). The notebook `usage_example.ipynb` demonstrate the use of the algorithm for those purposes. A more bare-bone implementaton of the same algorithm for the common use case of classification (removing the ability to classify `Z` based on `X` - the focus of the paper) is avaialble under `src/debias.py`.
+`src/inlp-oop` contains an implementations of the algorithm that allows learning a projection matrix for several common objectives, such as neutralizing the information captured by linear classifiers (a classification objective), or by linear siamese networks (a metric learning objective). The notebook `usage_example.ipynb` demonstrates the use of the algorithm for those purposes. A more bare-bone implementaton of the same algorithm for the common use case of classification (removing the ability to classify `Z` based on `X` - the focus of the paper) is avaialble under `src/debias.py`.
 
 # Experiments
 
