@@ -4,7 +4,7 @@ This repository contains the code for the experiments and algorithm in the paper
 
 # Algorithm
 
-The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp/inlp-oop`. This directory contain implementation of the algorithm for several common use cases, such as classification and metric-learning. The notebook `usage_example.ipynb` demonstrate how the code can be used to learn a projection matrix to neutralize certain information from an annotated dataset. A more bare-bone implementaton of the same algorithm for the common use case of classification is available under `src/debias.py`.
+The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp-oop`. This directory contain implementation of the algorithm for several common use cases, such as classification and metric-learning. The notebook `usage_example.ipynb` demonstrate how the code can be used to learn a projection matrix to neutralize certain information from an annotated dataset. A more bare-bone implementaton of the same algorithm for the common use case of classification is available under `src/debias.py`.
 
 # Experiments
 
