@@ -1,6 +1,6 @@
 # Iterative Nullspace Projection (INLP)
 
-This repository contains the code for the experiments and algorithm in the paper "Null it out: guarding protected attributes by iterative nullspsace projection" (accepted as a long paper in ACL 2020).
+This repository contains the code for the experiments and algorithm from the paper "Null it out: guarding protected attributes by iterative nullspsace projection" (accepted as a long paper in ACL 2020).
 
 # Algorithm
 
