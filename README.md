@@ -4,7 +4,7 @@ This repository contains the code for the experiments and algorithm in the paper
 
 # Algorithm
 
-The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp/inlp-oop`. 
+The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp/inlp-oop`. This directory contain implementation of the algorithm for several common use cases, such as classification and metric-learning. The notebook `usage_example.ipynb` demonstrate how the code can be used to learn a projection matrix to neutralize certain information from an annotated dataset. 
 
 # Experiments
 
@@ -23,8 +23,6 @@ download the data used for this project:
 
 ## Word Embedding experiments (Section 6.1 in the paper)
 
-Assumes uncased Common Crawl GloVe vectors saved at `data/embeddings`.
-
 ```py
 
 python src/data/filter_vecs.py \
@@ -34,6 +32,8 @@ python src/data/filter_vecs.py \
 --keep-inherently-gendered  \
 --keep-names 
 ```
+
+And run the notebook `word_vectors_debiasing.ipynb` (under "`notebooks`")
 
 ## Controlled Demographic experiments (Section 6.2 in the paper)
 
@@ -61,3 +61,4 @@ python src/data/create_dataset_biasbios.py \
 ./run_bias_bios.sh
 ```
 
+And run the notebooks `biasbios_fasttext.ipynb` and `biasbios_bert.ipynb`.
