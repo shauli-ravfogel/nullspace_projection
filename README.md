@@ -30,7 +30,7 @@ download the data used for this project:
 python src/data/filter_vecs.py \
 --input-path data/embeddings/glove.42B.300d.txt \
 --output-dir data/embeddings/ \
--top-k 150000  \
+--top-k 150000  \
 --keep-inherently-gendered  \
 --keep-names 
 ```
