@@ -23,9 +23,13 @@ download the data used for this project:
 ```
 
 
+
 ## Word Embedding experiments (Section 6.1 in the paper)
 
 ```py
+
+python src/data/to_word2vec_format.py data/embeddings/glove.42B
+.300d.txt
 
 python src/data/filter_vecs.py \
 --input-path data/embeddings/glove.42B.300d.txt \
