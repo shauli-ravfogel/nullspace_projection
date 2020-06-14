@@ -2,6 +2,28 @@
 
 This repository contains the code for the experiments and algorithm from the paper ["Null it out: guarding protected attributes by iterative nullspsace projection"](https://arxiv.org/abs/2004.07667) (accepted as a long paper in ACL 2020).
 
+To cite:
+
+```@article{DBLP:journals/corr/abs-2004-07667,
+  author    = {Shauli Ravfogel and
+               Yanai Elazar and
+               Hila Gonen and
+               Michael Twiton and
+               Yoav Goldberg},
+  title     = {Null It Out: Guarding Protected Attributes by Iterative Nullspace
+               Projection},
+  journal   = {CoRR},
+  volume    = {abs/2004.07667},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2004.07667},
+  archivePrefix = {arXiv},
+  eprint    = {2004.07667},
+  timestamp = {Tue, 21 Apr 2020 16:51:52 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2004-07667.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}'''
+
+
 # Algorithm
 
 The implementaion of the Iterative Nullspace Projection (INLP) method is available under `src/inlp-oop`. Given a dataset of examples `X` and annotation for any kind of information `Z` we want to remove from `X` (e.g. gender, sentiment, tense) the algorithm learns a proejction matrix `P` which aims to exhaustively remove the ability to linearly predict `Z` from `X` ("linear guardness"). 
