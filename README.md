@@ -4,24 +4,31 @@ This repository contains the code for the experiments and algorithm from the pap
 
 To cite:
 
-```@article{DBLP:journals/corr/abs-2004-07667,
+```
+@inproceedings{DBLP:conf/acl/RavfogelEGTG20,
   author    = {Shauli Ravfogel and
                Yanai Elazar and
                Hila Gonen and
                Michael Twiton and
                Yoav Goldberg},
+  editor    = {Dan Jurafsky and
+               Joyce Chai and
+               Natalie Schluter and
+               Joel R. Tetreault},
   title     = {Null It Out: Guarding Protected Attributes by Iterative Nullspace
                Projection},
-  journal   = {CoRR},
-  volume    = {abs/2004.07667},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational
+               Linguistics, {ACL} 2020, Online, July 5-10, 2020},
+  pages     = {7237--7256},
+  publisher = {Association for Computational Linguistics},
   year      = {2020},
-  url       = {https://arxiv.org/abs/2004.07667},
-  archivePrefix = {arXiv},
-  eprint    = {2004.07667},
-  timestamp = {Tue, 21 Apr 2020 16:51:52 +0200},
-  biburl    = {https://dblp.org/rec/journals/corr/abs-2004-07667.bib},
+  url       = {https://www.aclweb.org/anthology/2020.acl-main.647/},
+  timestamp = {Wed, 24 Jun 2020 17:15:07 +0200},
+  biburl    = {https://dblp.org/rec/conf/acl/RavfogelEGTG20.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
+
 ```
 
 
@@ -92,8 +99,8 @@ python src/data/create_dataset_biasbios.py \
 
 And run the notebooks `biasbios_fasttext.ipynb` and `biasbios_bert.ipynb`.
 
-# Models
+# Trained Models
 We [release](
-https://storage.cloud.google.com/ai2i/nullspace/after-gender-projection/gender-projection.zip) the following models and projection layers: "debiased" GloVe embeddings (`glove.42B.300d.projected.txt`) and "gender-neutralizing projection" (`P.glove.dim=300.iters=35.npy`) from Section 6.1 in the paper, and BERT-base "gender-neutralizing projection" (`P.bert_base.iters=300.npy`), over the biographies dataset, from Section 6.3 in the paper. `glove.42B.300d.projected.txt` was created by applying the transformation `P.glove.dim=300.iters=35.npy` over the original 300-dim GloVe embeddings. Note that the BERT projection `P.bert_base.iters=300.npy` is designed to remove the ability to predict gender from the CLS token, over a specific profession-prediction dataset. It is to be applied on layer 12 of BERT-base,a nd requires the finetuning of the subsequent linear layer. 
+https://storage.cloud.google.com/ai2i/nullspace/after-gender-projection/gender-projection.zip) the following models and projection layers: "debiased" GloVe embeddings (`glove.42B.300d.projected.txt`) and "gender-neutralizing projection" (`P.glove.dim=300.iters=35.npy`) from Section 6.1 in the paper, and BERT-base "gender-neutralizing projection" (`P.bert_base.iters=300.npy`), over the biographies dataset, from Section 6.3 in the paper. `glove.42B.300d.projected.txt` was created by applying the transformation `P.glove.dim=300.iters=35.npy` over the original 300-dim GloVe embeddings. Note that the BERT projection `P.bert_base.iters=300.npy` is designed to remove the ability to predict gender from the CLS token, over a specific profession-prediction dataset. It is to be applied on layer 12 of BERT-base, and requires the finetuning of the subsequent linear layer. 
 
 **Usage guidelines**: We urge practitioners *not* to treat those as "gender-neutral embeddings": naturally, as a research paper, the debiasing process was guided by one relatively simple definition of gender association, and was evaluated only on certain benchmarks. As such, it is likely that various gender-related biases are still present in the vectors. Rather, we hope that this model would encourage the community to explore which kinds of biases were mitigated by our intervention -- and which were not, shedding light on thw ways by which bias is manifested.
