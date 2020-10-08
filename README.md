@@ -79,6 +79,7 @@ export PYTHONPATH=/path_to/nullspace_projection
 ./run_deepmoji_debiasing.sh
 ```
 
+In order to recreate the evaluation used in the paper, check out the following [notebook](notebooks/debiased_representation.ipynb)
 
 ## Bias Bios experiments (Section 6.3 in the paper)
 
