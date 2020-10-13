@@ -20,7 +20,6 @@ def get_rowspace_projection(W: np.ndarray) -> np.ndarray:
     else:
         w_basis = scipy.linalg.orth(W.T) # orthogonal basis
 
-    w_basis = w_basis * np.sign(w_basis[0][0]) # handle sign ambiguity
     P_W = w_basis.dot(w_basis.T) # orthogonal projection on W's rowspace
 
     return P_W
