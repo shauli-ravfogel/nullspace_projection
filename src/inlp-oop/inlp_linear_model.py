@@ -8,6 +8,9 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 import siamese_model
+import pytorch_lightning as pl
+from pytorch_lightning import Trainer
+from torch.utils.data import DataLoader, random_split
 # an abstract class for linear classifiers
 
 class LinearModel(object):
@@ -33,7 +36,136 @@ class LinearModel(object):
         raise NotImplementedError
 
 
+class TorchLinearModel(pl.LightningModule):
 
+    def __init__(self, dim, device, use_bias = True, num_epochs=10):
+        super().__init__()
+        
+        self.bce_loss_fn = torch.nn.BCEWithLogitsLoss()
+        self.model = torch.nn.Linear(dim,1, bias = use_bias)
+        self.device = device
+        self.dim = dim
+        self.num_epochs = num_epochs
+        
+    """implementing the classifier interface"""
+    
+    def initialize_model(self):
+
+        self.model = torch.nn.Linear(self.dim, 1)
+        
+    def train_model(self, dataset_handler: inlp_dataset_handler.ClassificationDatasetHandler) -> float:
+
+        """
+        :param dataset_handler:
+        :return:  accuracy score on the dev set / Person's R in the case of regression
+        """
+
+        X_train, Y_train = dataset_handler.get_current_training_set()
+        X_dev, Y_dev = dataset_handler.get_current_dev_set()
+        train_loader = DataLoader(list(zip(X_train, Y_train)), batch_size = 16)
+        dev_loader = DataLoader(list(zip(X_dev, Y_dev)), batch_size = 16)
+        trainer = pl.Trainer(max_nb_epochs=self.num_epochs, min_nb_epochs=1, gpus = 1 if self.device == "cuda" else 0)
+        trainer.fit(self, train_loader, dev_loader)
+
+        score = self.score(X_dev, Y_dev)
+        return score
+    
+    def score(self, X_dev, Y_dev):
+    
+        dev_loader = DataLoader(list(zip(X_dev, Y_dev)), batch_size = 16)
+        accs = []
+        
+        for x,y in dev_loader:
+        
+            y_hat = self(x)
+            acc = self.calc_accuracy(y_hat, y)
+            accs.append(acc.detach().cpu().numpy().item())
+        
+        return np.mean(accs)
+        
+        
+    def get_weights(self) -> np.ndarray:
+        """
+        :return: final weights of the model, as np array
+        """
+
+        w = self.model.weight.detach().cpu().numpy()
+        
+        if len(w.shape) == 1:
+                w = np.expand_dims(w, 0)
+
+        return w  
+             
+    """ pytorch-lightning functions"""
+    
+    def forward(self, x):
+        return self.model(x.float()).squeeze(1)
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.bce_loss_fn(y_hat, y.float())
+        return {"loss": loss}
+    
+    def calc_accuracy(self, y_hat, y):
+    
+        return (torch.abs(torch.sigmoid(y_hat)-y) < 0.5).sum()/(1.*len(y_hat))
+        
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.bce_loss_fn(y_hat, y.float())
+        acc = self.calc_accuracy(y_hat, y)
+
+        return {"loss": loss, "acc": acc}
+        #self.log('valid_loss', loss)
+    
+    def validation_end(self, outputs):
+        avg_acc = torch.stack([x['acc'] for x in outputs]).mean()
+        print("ACC: {}".format(avg_acc.detach().cpu().numpy().item()))
+        return {"avg_acc": avg_acc}
+        
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters())
+        #return torch.optim.SGD(self.parameters(), lr = 1e-3, momentum = 0.75)
+        
+                
+class SKlearnClassifier(LinearModel):
+
+    def __init__(self, model_class, model_params):
+        self.model_class = model_class
+        self.model_params = model_params
+        self.initialize_model()
+
+    def initialize_model(self):
+
+        model = self.model_class(**self.model_params)
+        self.model = model
+        
+    def train_model(self, dataset_handler: inlp_dataset_handler.ClassificationDatasetHandler) -> float:
+
+        """
+        :param dataset_handler:
+        :return:  accuracy score on the dev set / Person's R in the case of regression
+        """
+
+        X_train, Y_train = dataset_handler.get_current_training_set()
+        X_dev, Y_dev = dataset_handler.get_current_dev_set()
+
+        score = self.model.score(X_dev, Y_dev)
+        return score
+        
+    def get_weights(self) -> np.ndarray:
+        """
+        :return: final weights of the model, as np array
+        """
+
+        w = self.model.coef_
+        if len(w.shape) == 1:
+                w = np.expand_dims(w, 0)
+
+        return w
+        
 
 class SKlearnClassifier(LinearModel):
 
@@ -251,4 +383,3 @@ class SiameseMetricLearning(LinearModel):
         if len(w.shape) == 1:
                 w = np.expand_dims(w, 0)
         return w
-
