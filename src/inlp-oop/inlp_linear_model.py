@@ -7,7 +7,6 @@ from torch.utils.data import Dataset
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
-import siamese_model
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader, random_split
@@ -41,9 +40,10 @@ class TorchLinearModel(pl.LightningModule):
     def __init__(self, dim, device, use_bias = True, num_epochs=10):
         super().__init__()
         
+        print(dim, device, use_bias)
         self.bce_loss_fn = torch.nn.BCEWithLogitsLoss()
         self.model = torch.nn.Linear(dim,1, bias = use_bias)
-        self.device = device
+        self.device_to_use = device
         self.dim = dim
         self.num_epochs = num_epochs
         
@@ -64,7 +64,7 @@ class TorchLinearModel(pl.LightningModule):
         X_dev, Y_dev = dataset_handler.get_current_dev_set()
         train_loader = DataLoader(list(zip(X_train, Y_train)), batch_size = 16)
         dev_loader = DataLoader(list(zip(X_dev, Y_dev)), batch_size = 16)
-        trainer = pl.Trainer(max_nb_epochs=self.num_epochs, min_nb_epochs=1, gpus = 1 if self.device == "cuda" else 0)
+        trainer = pl.Trainer(max_epochs=self.num_epochs, min_epochs=1, gpus = 1 if self.device_to_use == "cuda" else 0)
         trainer.fit(self, train_loader, dev_loader)
 
         score = self.score(X_dev, Y_dev)
@@ -227,7 +227,6 @@ class Dataset(torch.utils.data.Dataset):
             vec1 = vec1.to(self.device)
             vec2 = vec2.to(self.device)
             return vec1, vec2, torch.tensor(y).to(self.device).float()
-
 
 class MetricLearningDataset(torch.utils.data.Dataset):
     """Simple torch dataset class"""
