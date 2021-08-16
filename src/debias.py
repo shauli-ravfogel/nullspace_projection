@@ -61,7 +61,7 @@ def debias_by_specific_directions(directions: List[np.ndarray], input_dim: int):
 def get_debiasing_projection(classifier_class, cls_params: Dict, num_classifiers: int, input_dim: int,
                              is_autoregressive: bool,
                              min_accuracy: float, X_train: np.ndarray, Y_train: np.ndarray, X_dev: np.ndarray,
-                             Y_dev: np.ndarray, by_class=True, Y_train_main=None,
+                             Y_dev: np.ndarray, by_class=False, Y_train_main=None,
                              Y_dev_main=None, dropout_rate = 0) -> np.ndarray:
     """
     :param classifier_class: the sklearn classifier class (SVM/Perceptron etc.)
